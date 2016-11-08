@@ -1,15 +1,12 @@
 package play.filters.brotli
 
 import java.util.function.BiFunction
-import java.util.zip.GZIPOutputStream
 import javax.inject.{ Provider, Inject, Singleton }
 
 import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import com.typesafe.config.ConfigMemorySize
 import play.api.inject.Module
-import play.api.libs.streams.BrotliFlow
 import play.api.{ Environment, PlayConfig, Configuration }
 import play.api.mvc._
 import play.core.j
@@ -17,6 +14,9 @@ import scala.concurrent.Future
 import play.api.http.{ HttpChunk, HttpEntity, Status }
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.compat.java8.FunctionConverters._
+
+import org.meteogroup.jbrotli.Brotli
+import org.meteogroup.jbrotli.io.BrotliOutputStream
 
 /**
  * A brotli filter.
@@ -40,9 +40,10 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
   import play.api.http.HeaderNames._
 
-  def this(bufferSize: Int = 8192, chunkedThreshold: Int = 102400,
+  def this(quality: Int = 5,
+    chunkedThreshold: Int = 102400,
     shouldBrotli: (RequestHeader, Result) => Boolean = (_, _) => true)(implicit mat: Materializer) = {
-      this(BrotliFilterConfig(bufferSize, chunkedThreshold, shouldBrotli))
+      this(BrotliFilterConfig(quality, chunkedThreshold, shouldBrotli))
     }
 
 
@@ -65,15 +66,19 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
         case HttpEntity.Strict(data, contentType) =>
           Future.successful(Result(header, compressStrictEntity(data, contentType)))
 
-        case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) if contentLength <= config.chunkedThreshold =>
+        case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) /*if contentLength <= config.chunkedThreshold*/ =>
           // It's below the chunked threshold, so buffer then compress and send
           entity.consumeData.map { data =>
             Result(header, compressStrictEntity(data, contentType))
           }
 
+        /*
+
+        We do not support chunked response yet.
+
         case HttpEntity.Streamed(data, _, contentType) =>
           // It's above the chunked threshold, compress through the brotli flow, and send as chunked
-          val compressed = data via BrotliFlow.brotli(config.bufferSize) map (d => HttpChunk.Chunk(d))
+          val compressed = data via BrotliFlow.brotli(config.quality) map (d => HttpChunk.Chunk(d))
           Future.successful(Result(header, HttpEntity.Chunked(compressed, contentType)))
 
         case HttpEntity.Chunked(chunks, contentType) =>
@@ -100,8 +105,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
             new FlowShape(broadcast.in, concat.out)
           })
-
-          Future.successful(Result(header, HttpEntity.Chunked(chunks via brotliFlow, contentType)))
+          Future.successful(Result(header, HttpEntity.Chunked(chunks via brotliFlow, contentType)))*/
       }
     } else {
       Future.successful(result)
@@ -110,7 +114,8 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
   private def compressStrictEntity(data: ByteString, contentType: Option[String]) = {
     val builder = ByteString.newBuilder
-    val gzipOs = new GZIPOutputStream(builder.asOutputStream, config.bufferSize, true)
+    val brotliParameters = Brotli.DEFAULT_PARAMETER.setQuality(config.quality)
+    val gzipOs = new BrotliOutputStream(builder.asOutputStream, brotliParameters)
     gzipOs.write(data.toArray)
     gzipOs.close()
     HttpEntity.Strict(builder.result(), contentType)
@@ -172,12 +177,12 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 /**
  * Configuration for the brotli filter
  *
- * @param bufferSize The size of the buffer to use for brotli compressing.
+ * @param quality The compression-speed vs compression-density tradeoffs. The higher the quality, the slower the compression. Range is 0 to 11
  * @param chunkedThreshold The content length threshold, after which the filter will switch to chunking the result.
  * @param shouldBrotli Whether the given request/result should be compressed with brotli.  This can be used, for example, to implement
  *                   black/white lists for compressing by content type.
  */
-case class BrotliFilterConfig(bufferSize: Int = 8192,
+case class BrotliFilterConfig(quality: Int = 5,
     chunkedThreshold: Int = 102400,
     shouldBrotli: (RequestHeader, Result) => Boolean = (_, _) => true) {
 
@@ -191,7 +196,7 @@ case class BrotliFilterConfig(bufferSize: Int = 8192,
 
   def withChunkedThreshold(threshold: Int): BrotliFilterConfig = copy(chunkedThreshold = threshold)
 
-  def withBufferSize(size: Int): BrotliFilterConfig = copy(bufferSize = size)
+  def withQuality(q: Int): BrotliFilterConfig = copy(quality = q)
 }
 
 object BrotliFilterConfig {
@@ -201,8 +206,8 @@ object BrotliFilterConfig {
     val config = PlayConfig(conf).get[PlayConfig]("play.filters.brotli")
 
     BrotliFilterConfig(
-      bufferSize = config.get[ConfigMemorySize]("bufferSize").toBytes.toInt,
-      chunkedThreshold = config.get[ConfigMemorySize]("chunkedThreshold").toBytes.toInt
+      quality = config.get[Int]("quality")
+      /*,chunkedThreshold = config.get[ConfigMemorySize]("chunkedThreshold").toBytes.toInt*/
     )
   }
 }
@@ -215,14 +220,21 @@ class BrotliFilterConfigProvider @Inject() (config: Configuration) extends Provi
   lazy val get = BrotliFilterConfig.fromConfiguration(config)
 }
 
+
+import org.meteogroup.jbrotli.libloader.BrotliLibraryLoader;
+
 /**
  * The brotli filter module.
  */
 class BrotliFilterModule extends Module {
-  def bindings(environment: Environment, configuration: Configuration) = Seq(
-    bind[BrotliFilterConfig].toProvider[BrotliFilterConfigProvider],
-    bind[BrotliFilter].toSelf
-  )
+
+  def bindings(environment: Environment, configuration: Configuration) = {
+    BrotliLibraryLoader.loadBrotli()
+    Seq(
+      bind[BrotliFilterConfig].toProvider[BrotliFilterConfigProvider],
+      bind[BrotliFilter].toSelf
+    )
+  }
 }
 
 /**

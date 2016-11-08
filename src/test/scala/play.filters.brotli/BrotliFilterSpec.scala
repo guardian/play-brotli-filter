@@ -17,12 +17,13 @@ import play.api.routing.Router
 import play.api.test._
 import play.api.mvc.{ Action, Result }
 import play.api.mvc.Results._
-import java.util.zip.GZIPInputStream
 import java.io.ByteArrayInputStream
 import org.apache.commons.io.IOUtils
 import scala.concurrent.Future
 import scala.util.Random
 import org.specs2.matcher.DataTables
+
+import org.meteogroup.jbrotli.io.BrotliInputStream
 
 object BrotliFilterSpec extends PlaySpecification with DataTables {
 
@@ -98,20 +99,20 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
       checkNotCompressed(makeBrotliRequest(app), "")(app.materializer)
     }
 
-    "brotli chunked responses" in withApplication(Ok.chunked(Source(List("foo", "bar")))) { implicit app =>
+    /*"brotli chunked responses" in withApplication(Ok.chunked(Source(List("foo", "bar")))) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressedBody(result, "foobar")(app.materializer)
       await(result).body must beAnInstanceOf[HttpEntity.Chunked]
-    }
+    }*/
 
     val body = Random.nextString(1000)
 
-    "not buffer more than the configured threshold" in withApplication(
+    /*"not buffer more than the configured threshold" in withApplication(
       Ok.sendEntity(HttpEntity.Streamed(Source.single(ByteString(body)), Some(1000), None)), chunkedThreshold = 512) { implicit app =>
         val result = makeBrotliRequest(app)
         checkCompressedBody(result, body)(app.materializer)
         await(result).body must beAnInstanceOf[HttpEntity.Chunked]
-      }
+      }*/
 
     "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), 512) { implicit app =>
       val result = makeBrotliRequest(app)
@@ -163,7 +164,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
   def requestAccepting(app: Application, codings: String) = route(app, FakeRequest().withHeaders(ACCEPT_ENCODING -> codings)).get
 
   def gunzip(bytes: ByteString): String = {
-    val is = new GZIPInputStream(new ByteArrayInputStream(bytes.toArray))
+    val is = new BrotliInputStream(new ByteArrayInputStream(bytes.toArray))
     val result = IOUtils.toString(is, "UTF-8")
     is.close()
     result
