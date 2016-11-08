@@ -48,8 +48,10 @@ releaseProcess := Seq(
   pushChanges
 )
 
+resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
 libraryDependencies ++= Seq(
+  "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
   "com.typesafe.play" %% "play" % "2.5.9",
   "com.typesafe.play" %% "filters-helpers" % "2.5.9" % "test",
   "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test"
