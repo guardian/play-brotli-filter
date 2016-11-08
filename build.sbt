@@ -22,7 +22,7 @@ publishTo <<= version { v =>
 publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
-description := ""
+description := "A brotli filter for the play framework"
 scalaVersion := "2.11.8"
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 organization := "com.gu"
