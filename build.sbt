@@ -50,8 +50,36 @@ releaseProcess := Seq(
 
 resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
+
+val brotliNativeArtefact = {
+
+  val osName = System.getProperty("os.name").toLowerCase
+  val osArch = System.getProperty("os.arch").toLowerCase
+  
+  val family = if (osName.startsWith("linux")) {
+    "linux"
+    } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
+      "darwin"
+    } else {
+      "win32"
+  }
+
+  val arch = if (family == "darwin") {
+      "x86-amd64"
+    } else if (osArch == "i386" || osArch == "i486" || osArch == "i586" || osArch == "i686") {
+      "x86"
+    } else if (osArch == "amd64" || osArch == "x86-64" || osArch == "x64") {
+      "x86-amd64"
+    } else if (family == "linux" && osArch.startsWith("arm")) {
+      "arm32-vfp-hflt"
+  }
+
+  s"jbrotli-native-$family-$arch"
+}
+
 libraryDependencies ++= Seq(
   "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
+  "org.meteogroup.jbrotli" % brotliNativeArtefact % "0.5.0",
   "com.typesafe.play" %% "play" % "2.5.9",
   "com.typesafe.play" %% "filters-helpers" % "2.5.9" % "test",
   "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test"
