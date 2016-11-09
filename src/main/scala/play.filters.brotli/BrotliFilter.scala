@@ -18,6 +18,8 @@ import scala.compat.java8.FunctionConverters._
 import org.meteogroup.jbrotli.Brotli
 import org.meteogroup.jbrotli.io.BrotliOutputStream
 
+  import org.meteogroup.jbrotli.libloader.BrotliLibraryLoader
+
 /**
  * A brotli filter.
  *
@@ -37,6 +39,11 @@ import org.meteogroup.jbrotli.io.BrotliOutputStream
  */
 @Singleton
 class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Materializer) extends EssentialFilter {
+
+
+  {
+    BrotliLibraryLoader.loadBrotli()
+  }
 
   import play.api.http.HeaderNames._
 
@@ -221,15 +228,12 @@ class BrotliFilterConfigProvider @Inject() (config: Configuration) extends Provi
 }
 
 
-import org.meteogroup.jbrotli.libloader.BrotliLibraryLoader;
-
 /**
  * The brotli filter module.
  */
 class BrotliFilterModule extends Module {
 
   def bindings(environment: Environment, configuration: Configuration) = {
-    BrotliLibraryLoader.loadBrotli()
     Seq(
       bind[BrotliFilterConfig].toProvider[BrotliFilterConfigProvider],
       bind[BrotliFilter].toSelf
