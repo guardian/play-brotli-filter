@@ -7,6 +7,14 @@ A [Brotli](https://opensource.googleblog.com/2015/09/introducing-brotli-new-comp
 
 ## Install
 
+Add `jbrotli` bintray as a resolver:
+
+```scala
+resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
+```
+
+Add `play-brotli-filter` as a dependency:
+
 ```scala
 libraryDependencies ++= Seq(
  "com.gu" %% "play-brotli-filter" % "0.1",
