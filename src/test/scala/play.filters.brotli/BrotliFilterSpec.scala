@@ -13,9 +13,9 @@ import play.api.Application
 import play.api.http.{ HttpEntity, HttpFilters }
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.routing.Router
+import play.api.routing.{Router, SimpleRouterImpl}
 import play.api.test._
-import play.api.mvc.{ Action, Result }
+import play.api.mvc.{ Action, DefaultActionBuilder, Result }
 import play.api.mvc.Results._
 import java.io.ByteArrayInputStream
 import org.apache.commons.io.IOUtils
@@ -143,15 +143,16 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     def filters = Seq(brotliFilter)
   }
 
-  def withApplication[T](result: Result, chunkedThreshold: Int = 1024)(block: Application => T): T = {
+  class ResultRouter @Inject() (action: DefaultActionBuilder, result: Result) extends SimpleRouterImpl({ case _ => action(result) })
+
+  def withApplication[T](result: Result, quality: Int = 5, chunkedThreshold: Int = 1024)(block: Application => T): T = {
     val application = new GuiceApplicationBuilder()
       .configure(
-        "play.filters.brotli.chunkedThreshold" -> chunkedThreshold,
-        "play.filters.brotli.bufferSize" -> 512
+        "play.filters.brotli.quality" -> quality,
+        "play.filters.brotli.chunkedThreshold" -> chunkedThreshold
       ).overrides(
-          bind[Router].to(Router.from {
-            case _ => Action(result)
-          }),
+          bind[Result].to(result),
+          bind[Router].to[ResultRouter],
           bind[HttpFilters].to[Filters]
         ).build
     running(application)(block(application))
@@ -163,7 +164,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
 
   def requestAccepting(app: Application, codings: String) = route(app, FakeRequest().withHeaders(ACCEPT_ENCODING -> codings)).get
 
-  def gunzip(bytes: ByteString): String = {
+  def uncompress(bytes: ByteString): String = {
     val is = new BrotliInputStream(new ByteArrayInputStream(bytes.toArray))
     val result = IOUtils.toString(is, "UTF-8")
     is.close()
@@ -180,7 +181,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     await(result).body.contentLength.foreach { cl =>
       resultBody.length must_== cl
     }
-    gunzip(resultBody) must_== body
+    uncompress(resultBody) must_== body
   }
 
   def checkNotCompressed(result: Future[Result], body: String)(implicit mat: Materializer) = {

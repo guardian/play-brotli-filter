@@ -2,7 +2,24 @@ import sbtrelease.ReleaseStateTransformations._
 
 name:="play-brotli-filter"
 
-pomExtra := (
+organization := "com.gu"
+
+description := "A brotli filter for the play framework"
+
+licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+
+scalaVersion := "2.11.11"
+
+crossScalaVersions := Seq("2.12.3", "2.11.11")
+
+scalacOptions ++= Seq("-feature", "-deprecation")
+
+scmInfo := Some(ScmInfo(
+  url("https://github.com/guardian/play-brotli-filter"),
+  "scm:git:git@github.com:guardian/play-brotli-filter.git"
+))
+
+pomExtra := {
   <url>https://github.com/guardian/play-brotli-filter</url>
     <developers>
       <developer>
@@ -11,28 +28,14 @@ pomExtra := (
         <url>https://github.com/mchv</url>
       </developer>
     </developers>
-  )
-publishTo <<= version { v =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
-publishMavenStyle := true
+  }
+
+releaseCrossBuild := true
+
 publishArtifact in Test := false
-pomIncludeRepository := { _ => false }
-description := "A brotli filter for the play framework"
-scalaVersion := "2.11.8"
+
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
-organization := "com.gu"
-licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
-scmInfo := Some(ScmInfo(
-  url("https://github.com/guardian/play-brotli-filter"),
-  "scm:git:git@github.com:guardian/play-brotli-filter.git"
-))
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
-scalacOptions ++= Seq("-deprecation", "-unchecked")
+
 releaseProcess := Seq(
   checkSnapshotDependencies,
   inquireVersions,
@@ -46,7 +49,9 @@ releaseProcess := Seq(
   commitNextVersion,
   releaseStepCommand("sonatypeReleaseAll"),
   pushChanges
-)
+) 
+
+resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
@@ -80,7 +85,7 @@ val brotliNativeArtefact = {
 libraryDependencies ++= Seq(
   "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
   "org.meteogroup.jbrotli" % brotliNativeArtefact % "0.5.0" % "provided",
-  "com.typesafe.play" %% "play" % "2.5.9",
-  "com.typesafe.play" %% "filters-helpers" % "2.5.9" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test"
+  "com.typesafe.play" %% "play" % "2.6.3",
+  "com.typesafe.play" %% "filters-helpers" % "2.6.3" % "test",
+  "com.typesafe.play" %% "play-specs2" % "2.6.3" % "test"
 )

@@ -55,6 +55,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   def apply(next: EssentialAction) = new EssentialAction {
+    implicit val ec = mat.executionContext
     def apply(request: RequestHeader) = {
       if (mayCompress(request)) {
         next(request).mapFuture(result => handleResult(request, result))
@@ -66,6 +67,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
   private def handleResult(request: RequestHeader, result: Result): Future[Result] = {
     if (shouldCompress(result) && config.shouldBrotli(request, result)) {
+      implicit val ec = mat.executionContext
       val header = result.header.copy(headers = setupHeader(result.header.headers))
 
       result.body match {
@@ -199,7 +201,7 @@ case class BrotliFilterConfig(quality: Int = 5,
   def withShouldBrotli(shouldBrotli: (RequestHeader, Result) => Boolean): BrotliFilterConfig = copy(shouldBrotli = shouldBrotli)
 
   def withShouldBrotli(shouldBrotli: BiFunction[play.mvc.Http.RequestHeader, play.mvc.Result, Boolean]): BrotliFilterConfig =
-    withShouldBrotli((req, res) => shouldBrotli.asScala(new j.RequestHeaderImpl(req), res.asJava))
+    withShouldBrotli((req: RequestHeader, res: Result) => shouldBrotli.asScala(new j.RequestHeaderImpl(req), res.asJava))
 
   def withChunkedThreshold(threshold: Int): BrotliFilterConfig = copy(chunkedThreshold = threshold)
 
@@ -210,7 +212,7 @@ object BrotliFilterConfig {
 
   def fromConfiguration(conf: Configuration) = {
 
-    val config = PlayConfig(conf).get[PlayConfig]("play.filters.brotli")
+    val config = conf.get[Configuration]("play.filters.brotli")
 
     BrotliFilterConfig(
       quality = config.get[Int]("quality")
