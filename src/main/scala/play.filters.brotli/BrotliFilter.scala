@@ -201,7 +201,7 @@ case class BrotliFilterConfig(quality: Int = 5,
   def withShouldBrotli(shouldBrotli: (RequestHeader, Result) => Boolean): BrotliFilterConfig = copy(shouldBrotli = shouldBrotli)
 
   def withShouldBrotli(shouldBrotli: BiFunction[play.mvc.Http.RequestHeader, play.mvc.Result, Boolean]): BrotliFilterConfig =
-    withShouldBrotli((req, res) => shouldBrotli.asScala(new j.RequestHeaderImpl(req), res.asJava))
+    withShouldBrotli((req: RequestHeader, res: Result) => shouldBrotli.asScala(new j.RequestHeaderImpl(req), res.asJava))
 
   def withChunkedThreshold(threshold: Int): BrotliFilterConfig = copy(chunkedThreshold = threshold)
 
