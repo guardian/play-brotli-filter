@@ -36,6 +36,13 @@ publishArtifact in Test := false
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
+
 releaseProcess := Seq(
   checkSnapshotDependencies,
   inquireVersions,
