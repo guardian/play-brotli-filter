@@ -13,9 +13,9 @@ import play.api.Application
 import play.api.http.{ HttpEntity, HttpFilters }
 import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.routing.Router
+import play.api.routing.{Router, SimpleRouterImpl}
 import play.api.test._
-import play.api.mvc.{ Action, Result }
+import play.api.mvc.{ Action, DefaultActionBuilder, Result }
 import play.api.mvc.Results._
 import java.io.ByteArrayInputStream
 import org.apache.commons.io.IOUtils
@@ -143,15 +143,16 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     def filters = Seq(brotliFilter)
   }
 
+  class ResultRouter @Inject() (action: DefaultActionBuilder, result: Result) extends SimpleRouterImpl({ case _ => action(result) })
+
   def withApplication[T](result: Result, quality: Int = 5, chunkedThreshold: Int = 1024)(block: Application => T): T = {
     val application = new GuiceApplicationBuilder()
       .configure(
         "play.filters.brotli.quality" -> quality,
         "play.filters.brotli.chunkedThreshold" -> chunkedThreshold
       ).overrides(
-          bind[Router].to(Router.from {
-            case _ => Action(result)
-          }),
+          bind[Result].to(result),
+          bind[Router].to[ResultRouter],
           bind[HttpFilters].to[Filters]
         ).build
     running(application)(block(application))

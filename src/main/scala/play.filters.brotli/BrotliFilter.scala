@@ -55,6 +55,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   def apply(next: EssentialAction) = new EssentialAction {
+    implicit val ec = mat.executionContext
     def apply(request: RequestHeader) = {
       if (mayCompress(request)) {
         next(request).mapFuture(result => handleResult(request, result))
@@ -66,6 +67,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
   private def handleResult(request: RequestHeader, result: Result): Future[Result] = {
     if (shouldCompress(result) && config.shouldBrotli(request, result)) {
+      implicit val ec = mat.executionContext
       val header = result.header.copy(headers = setupHeader(result.header.headers))
 
       result.body match {
@@ -210,7 +212,7 @@ object BrotliFilterConfig {
 
   def fromConfiguration(conf: Configuration) = {
 
-    val config = PlayConfig(conf).get[PlayConfig]("play.filters.brotli")
+    val config = conf.get[Configuration]("play.filters.brotli")
 
     BrotliFilterConfig(
       quality = config.get[Int]("quality")

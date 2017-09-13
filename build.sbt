@@ -85,7 +85,7 @@ val brotliNativeArtefact = {
 libraryDependencies ++= Seq(
   "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
   "org.meteogroup.jbrotli" % brotliNativeArtefact % "0.5.0" % "provided",
-  "com.typesafe.play" %% "play" % "2.5.9",
-  "com.typesafe.play" %% "filters-helpers" % "2.5.9" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.5.9" % "test"
+  "com.typesafe.play" %% "play" % "2.6.3",
+  "com.typesafe.play" %% "filters-helpers" % "2.6.3" % "test",
+  "com.typesafe.play" %% "play-specs2" % "2.6.3" % "test"
 )
