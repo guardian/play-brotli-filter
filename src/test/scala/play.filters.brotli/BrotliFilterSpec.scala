@@ -143,11 +143,11 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     def filters = Seq(brotliFilter)
   }
 
-  def withApplication[T](result: Result, chunkedThreshold: Int = 1024)(block: Application => T): T = {
+  def withApplication[T](result: Result, quality: Int = 5, chunkedThreshold: Int = 1024)(block: Application => T): T = {
     val application = new GuiceApplicationBuilder()
       .configure(
-        "play.filters.brotli.chunkedThreshold" -> chunkedThreshold,
-        "play.filters.brotli.bufferSize" -> 512
+        "play.filters.brotli.quality" -> quality,
+        "play.filters.brotli.chunkedThreshold" -> chunkedThreshold
       ).overrides(
           bind[Router].to(Router.from {
             case _ => Action(result)
@@ -163,7 +163,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
 
   def requestAccepting(app: Application, codings: String) = route(app, FakeRequest().withHeaders(ACCEPT_ENCODING -> codings)).get
 
-  def gunzip(bytes: ByteString): String = {
+  def uncompress(bytes: ByteString): String = {
     val is = new BrotliInputStream(new ByteArrayInputStream(bytes.toArray))
     val result = IOUtils.toString(is, "UTF-8")
     is.close()
@@ -180,7 +180,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     await(result).body.contentLength.foreach { cl =>
       resultBody.length must_== cl
     }
-    gunzip(resultBody) must_== body
+    uncompress(resultBody) must_== body
   }
 
   def checkNotCompressed(result: Future[Result], body: String)(implicit mat: Materializer) = {
