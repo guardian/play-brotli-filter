@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.13.4"
 
-crossScalaVersions := Seq("2.12.3", "2.11.11")
+crossScalaVersions := Seq("2.13.4", "2.12.12")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
