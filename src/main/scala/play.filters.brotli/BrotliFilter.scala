@@ -7,12 +7,11 @@ import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import play.api.inject.Module
-import play.api.{ Environment, PlayConfig, Configuration }
+import play.api.{ Environment, Configuration }
 import play.api.mvc._
 import play.core.j
 import scala.concurrent.Future
 import play.api.http.{ HttpChunk, HttpEntity, Status }
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.compat.java8.FunctionConverters._
 
 import org.meteogroup.jbrotli.Brotli
