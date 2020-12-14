@@ -58,7 +58,7 @@ releaseProcess := Seq(
   pushChanges
 ) 
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
