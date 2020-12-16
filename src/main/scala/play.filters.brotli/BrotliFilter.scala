@@ -7,18 +7,17 @@ import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import play.api.inject.Module
-import play.api.{ Environment, PlayConfig, Configuration }
+import play.api.{ Environment, Configuration }
 import play.api.mvc._
 import play.core.j
 import scala.concurrent.Future
 import play.api.http.{ HttpChunk, HttpEntity, Status }
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.compat.java8.FunctionConverters._
 
-import org.meteogroup.jbrotli.Brotli
-import org.meteogroup.jbrotli.io.BrotliOutputStream
+import com.nixxcode.jvmbrotli.enc.Encoder
+import com.nixxcode.jvmbrotli.enc.BrotliOutputStream
 
-  import org.meteogroup.jbrotli.libloader.BrotliLibraryLoader
+import com.nixxcode.jvmbrotli.common.BrotliLoader
 
 /**
  * A brotli filter.
@@ -42,7 +41,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   {
-    BrotliLibraryLoader.loadBrotli()
+    BrotliLoader.isBrotliAvailable()
   }
 
   import play.api.http.HeaderNames._
@@ -75,6 +74,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
         case HttpEntity.Strict(data, contentType) =>
           Future.successful(Result(header, compressStrictEntity(data, contentType)))
 
+
         case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) /*if contentLength <= config.chunkedThreshold*/ =>
           // It's below the chunked threshold, so buffer then compress and send
           entity.consumeData.map { data =>
@@ -84,6 +84,13 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
         /*
 
         We do not support chunked response yet.
+
+        case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 =>
+          // It's above the chunked threshold, but we can't chunk it because we're using HTTP 1.0.
+          // Instead, we use a close delimited body (ie, regular body with no content length)
+          val gzipped = data.via(createGzipFlow)
+          Future.successful(
+            result.copy(header = header, body = HttpEntity.Streamed(gzipped, None, contentType))
 
         case HttpEntity.Streamed(data, _, contentType) =>
           // It's above the chunked threshold, compress through the brotli flow, and send as chunked
@@ -123,7 +130,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
   private def compressStrictEntity(data: ByteString, contentType: Option[String]) = {
     val builder = ByteString.newBuilder
-    val brotliParameters = Brotli.DEFAULT_PARAMETER.setQuality(config.quality)
+    val brotliParameters = new Encoder.Parameters().setQuality(config.quality)
     val gzipOs = new BrotliOutputStream(builder.asOutputStream, brotliParameters)
     gzipOs.write(data.toArray)
     gzipOs.close()

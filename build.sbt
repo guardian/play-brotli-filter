@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.13.4"
 
-crossScalaVersions := Seq("2.12.3", "2.11.11")
+crossScalaVersions := Seq("2.13.4", "2.12.12")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -58,7 +58,7 @@ releaseProcess := Seq(
   pushChanges
 ) 
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
@@ -86,13 +86,13 @@ val brotliNativeArtefact = {
       "arm32-vfp-hflt"
   }
 
-  s"jbrotli-native-$family-$arch"
+  s"jvmbrotli-$family-$arch"
 }
 
 libraryDependencies ++= Seq(
-  "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
-  "org.meteogroup.jbrotli" % brotliNativeArtefact % "0.5.0" % "provided",
-  "com.typesafe.play" %% "play" % "2.6.3" % "provided",
-  "com.typesafe.play" %% "filters-helpers" % "2.6.3" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.6.3" % "test"
+  "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0",
+  "com.nixxcode.jvmbrotli" % brotliNativeArtefact % "0.2.0" % "provided",
+  "com.typesafe.play" %% "play" % "2.8.6" % "provided",
+  "com.typesafe.play" %% "filters-helpers" % "2.8.6" % "test",
+  "com.typesafe.play" %% "play-specs2" % "2.8.6" % "test"
 )

@@ -15,15 +15,15 @@ import play.api.inject._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.routing.{Router, SimpleRouterImpl}
 import play.api.test._
-import play.api.mvc.{ Action, DefaultActionBuilder, Result }
+import play.api.mvc.{ AnyContentAsEmpty, Action, DefaultActionBuilder, Result }
 import play.api.mvc.Results._
 import java.io.ByteArrayInputStream
 import org.apache.commons.io.IOUtils
 import scala.concurrent.Future
 import scala.util.Random
-import org.specs2.matcher.DataTables
+import org.specs2.matcher.{DataTables, MatchResult}
 
-import org.meteogroup.jbrotli.io.BrotliInputStream
+import com.nixxcode.jvmbrotli.dec.BrotliInputStream
 
 object BrotliFilterSpec extends PlaySpecification with DataTables {
 
@@ -114,7 +114,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
         await(result).body must beAnInstanceOf[HttpEntity.Chunked]
       }*/
 
-    "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), 512) { implicit app =>
+    "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), chunkedThreshold = 512) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressedBody(result, body)(app.materializer)
       await(result).body must beAnInstanceOf[HttpEntity.Strict]
@@ -154,15 +154,15 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
           bind[Result].to(result),
           bind[Router].to[ResultRouter],
           bind[HttpFilters].to[Filters]
-        ).build
+        ).build()
     running(application)(block(application))
   }
 
-  def brotliRequest = FakeRequest().withHeaders(ACCEPT_ENCODING -> "br")
+  def brotliRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(ACCEPT_ENCODING -> "br")
 
-  def makeBrotliRequest(app: Application) = route(app, brotliRequest).get
+  def makeBrotliRequest(app: Application): Future[Result] = route(app, brotliRequest).get
 
-  def requestAccepting(app: Application, codings: String) = route(app, FakeRequest().withHeaders(ACCEPT_ENCODING -> codings)).get
+  def requestAccepting(app: Application, codings: String): Future[Result] = route(app, FakeRequest().withHeaders(ACCEPT_ENCODING -> codings)).get
 
   def uncompress(bytes: ByteString): String = {
     val is = new BrotliInputStream(new ByteArrayInputStream(bytes.toArray))
@@ -171,11 +171,11 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     result
   }
 
-  def checkCompressed(result: Future[Result]) = {
+  def checkCompressed(result: Future[Result]): MatchResult[Option[String]] = {
     header(CONTENT_ENCODING, result) aka "Content encoding header" must beSome("br")
   }
 
-  def checkCompressedBody(result: Future[Result], body: String)(implicit mat: Materializer) = {
+  def checkCompressedBody(result: Future[Result], body: String)(implicit mat: Materializer): MatchResult[Any] = {
     checkCompressed(result)
     val resultBody = contentAsBytes(result)
     await(result).body.contentLength.foreach { cl =>
@@ -184,7 +184,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     uncompress(resultBody) must_== body
   }
 
-  def checkNotCompressed(result: Future[Result], body: String)(implicit mat: Materializer) = {
+  def checkNotCompressed(result: Future[Result], body: String)(implicit mat: Materializer): MatchResult[Any] = {
     header(CONTENT_ENCODING, result) must beNone
     contentAsString(result) must_== body
   }
