@@ -23,7 +23,7 @@ import scala.concurrent.Future
 import scala.util.Random
 import org.specs2.matcher.{DataTables, MatchResult}
 
-import org.meteogroup.jbrotli.io.BrotliInputStream
+import com.nixxcode.jvmbrotli.dec.BrotliInputStream
 
 object BrotliFilterSpec extends PlaySpecification with DataTables {
 

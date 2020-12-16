@@ -86,12 +86,12 @@ val brotliNativeArtefact = {
       "arm32-vfp-hflt"
   }
 
-  s"jbrotli-native-$family-$arch"
+  s"jvmbrotli-$family-$arch"
 }
 
 libraryDependencies ++= Seq(
-  "org.meteogroup.jbrotli" % "jbrotli" % "0.5.0",
-  "org.meteogroup.jbrotli" % brotliNativeArtefact % "0.5.0" % "provided",
+  "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0",
+  "com.nixxcode.jvmbrotli" % brotliNativeArtefact % "0.2.0" % "provided",
   "com.typesafe.play" %% "play" % "2.8.6" % "provided",
   "com.typesafe.play" %% "filters-helpers" % "2.8.6" % "test",
   "com.typesafe.play" %% "play-specs2" % "2.8.6" % "test"
