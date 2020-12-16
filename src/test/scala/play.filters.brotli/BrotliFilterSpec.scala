@@ -114,7 +114,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
         await(result).body must beAnInstanceOf[HttpEntity.Chunked]
       }*/
 
-    "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), 512) { implicit app =>
+    "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), chunkedThreshold = 512) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressedBody(result, body)(app.materializer)
       await(result).body must beAnInstanceOf[HttpEntity.Strict]
