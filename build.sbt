@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.8"
 
-crossScalaVersions := Seq("2.13.4", "2.12.12")
+crossScalaVersions := Seq("2.13.8", "2.12.15")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -32,7 +32,7 @@ pomExtra := {
 
 releaseCrossBuild := true
 
-publishArtifact in Test := false
+Test / publishArtifact := false
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
@@ -60,7 +60,7 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
+//resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
 
 
 val brotliNativeArtefact = {
@@ -90,9 +90,10 @@ val brotliNativeArtefact = {
 }
 
 libraryDependencies ++= Seq(
-  "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0",
-  "com.nixxcode.jvmbrotli" % brotliNativeArtefact % "0.2.0" % "provided",
-  "com.typesafe.play" %% "play" % "2.8.6" % "provided",
-  "com.typesafe.play" %% "filters-helpers" % "2.8.6" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.8.6" % "test"
+  //"com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0",
+  //"com.nixxcode.jvmbrotli" % brotliNativeArtefact % "0.2.0" % "provided",
+  "com.aayushatharva.brotli4j" % "brotli4j" % "1.7.1",
+  "com.typesafe.play" %% "play" % "2.8.15" % "provided",
+  "com.typesafe.play" %% "filters-helpers" % "2.8.15" % "test",
+  "com.typesafe.play" %% "play-specs2" % "2.8.15" % "test"
 )
