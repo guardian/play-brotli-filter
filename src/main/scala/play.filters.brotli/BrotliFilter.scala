@@ -14,10 +14,8 @@ import scala.concurrent.Future
 import play.api.http.{ HttpChunk, HttpEntity, Status }
 import scala.compat.java8.FunctionConverters._
 
-import com.nixxcode.jvmbrotli.enc.Encoder
-import com.nixxcode.jvmbrotli.enc.BrotliOutputStream
-
-import com.nixxcode.jvmbrotli.common.BrotliLoader
+import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
+import com.aayushatharva.brotli4j.encoder.Encoder;
 
 /**
  * A brotli filter.
@@ -41,7 +39,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   {
-    BrotliLoader.isBrotliAvailable()
+    Brotli.ensureAvailability()
   }
 
   import play.api.http.HeaderNames._
