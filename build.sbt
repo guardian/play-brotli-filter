@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.8"
 
-crossScalaVersions := Seq("2.13.4", "2.12.12")
+crossScalaVersions := Seq("2.13.8", "2.12.15")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -32,7 +32,7 @@ pomExtra := {
 
 releaseCrossBuild := true
 
-publishArtifact in Test := false
+Test / publishArtifact := false
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
@@ -60,39 +60,10 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "JBrotli Bintray Repository" at "https://dl.bintray.com/nitram509/jbrotli/"
-
-
-val brotliNativeArtefact = {
-
-  val osName = System.getProperty("os.name").toLowerCase
-  val osArch = System.getProperty("os.arch").toLowerCase
-  
-  val family = if (osName.startsWith("linux")) {
-    "linux"
-    } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
-      "darwin"
-    } else {
-      "win32"
-  }
-
-  val arch = if (family == "darwin") {
-      "x86-amd64"
-    } else if (osArch == "i386" || osArch == "i486" || osArch == "i586" || osArch == "i686") {
-      "x86"
-    } else if (osArch == "amd64" || osArch == "x86-64" || osArch == "x64") {
-      "x86-amd64"
-    } else if (family == "linux" && osArch.startsWith("arm")) {
-      "arm32-vfp-hflt"
-  }
-
-  s"jvmbrotli-$family-$arch"
-}
 
 libraryDependencies ++= Seq(
-  "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0",
-  "com.nixxcode.jvmbrotli" % brotliNativeArtefact % "0.2.0" % "provided",
-  "com.typesafe.play" %% "play" % "2.8.6" % "provided",
-  "com.typesafe.play" %% "filters-helpers" % "2.8.6" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.8.6" % "test"
+  "com.aayushatharva.brotli4j" % "brotli4j" % "1.7.1",
+  "com.typesafe.play" %% "play" % "2.8.15" % "provided",
+  "com.typesafe.play" %% "filters-helpers" % "2.8.15" % "test",
+  "com.typesafe.play" %% "play-specs2" % "2.8.15" % "test"
 )
