@@ -1,5 +1,21 @@
-.*
-!.gitignore
-!.travis.yml
+# SBT, bloop and metals
+.bloop
+.bsp
+.metals
+project/metals.sbt
 
+# vs code
+.vscode
+
+# scala 3
+.tasty
+
+
+# sbt
+project/project/
+project/target/
 target/
+
+# Ignore Mac DS_Store files
+.DS_Store
+**/.DS_Store
