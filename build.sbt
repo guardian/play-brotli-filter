@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.10"
 
-crossScalaVersions := Seq("2.13.8", "2.12.15")
+crossScalaVersions := Seq("2.13.10", "2.12.17")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -38,7 +38,7 @@ releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 publishTo := Some(
   if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
+    Opts.resolver.sonatypeOssSnapshots.head /* Take first repo */
   else
     Opts.resolver.sonatypeStaging
 )
