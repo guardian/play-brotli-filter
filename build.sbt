@@ -60,10 +60,35 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
+val brotli4jVersion = "1.8.0"
 
 libraryDependencies ++= Seq(
-  "com.aayushatharva.brotli4j" % "brotli4j" % "1.7.1",
+  "com.aayushatharva.brotli4j" % "brotli4j" % brotli4jVersion,
   "com.typesafe.play" %% "play" % "2.8.15" % "provided",
   "com.typesafe.play" %% "filters-helpers" % "2.8.15" % "test",
   "com.typesafe.play" %% "play-specs2" % "2.8.15" % "test"
 )
+
+
+/* Use assembly output as packaged jar */
+Compile / packageBin := assembly.value
+
+
+/* Use same packaged jar name that packageBin task */
+assembly / assemblyJarName :=  s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+
+
+/* Exclude the scala library from being included in assembled jar*/
+assembly / assemblyOption ~= {
+      _.withIncludeScala(false)
+}
+
+/* Exclude brotli4j library from being included in assembled jar*/
+assembly / assemblyExcludedJars := {
+      val cp = (assembly / fullClasspath).value
+      cp filter {_.data.getName == s"brotli4j-${brotli4jVersion}.jar"}
+}
+
+
+
+
