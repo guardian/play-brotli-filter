@@ -16,7 +16,7 @@
 
 package play.filters.brotli;
 
-import play.filters.brotli.loader.BrotliNativeLoader;
+import com.aayushatharva.brotli4j.Brotli4jLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -29,7 +29,7 @@ public final class Brotli {
         ClassNotFoundException cnfe = null;
 
         try {
-            Class.forName("play.filters.brotli.loader.BrotliNativeLoader", false, Brotli.getClassLoader(Brotli.class));
+            Class.forName("com.aayushatharva.brotli4j.Brotli4jLoader", false, Brotli.getClassLoader(Brotli.class));
         } catch (ClassNotFoundException t) {
             cnfe = t;
             System.out.println(
@@ -40,7 +40,7 @@ public final class Brotli {
 
         // If in the classpath, try to load the native library and initialize brotli4j.
         if (cnfe == null) {
-            cause = BrotliNativeLoader.getUnavailabilityCause();
+            cause = Brotli4jLoader.getUnavailabilityCause();
             if (cause != null) {
                 System.out.println("Failed to load brotli4j; Brotli support will be unavailable");
                 cause.printStackTrace();
@@ -54,7 +54,7 @@ public final class Brotli {
      * and native library is available on this platform and could be loaded
      */
     public static boolean isAvailable() {
-        return CNFE == null && BrotliNativeLoader.isAvailable();
+        return CNFE == null && Brotli4jLoader.isAvailable();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class Brotli {
         if (CNFE != null) {
             throw CNFE;
         }
-        BrotliNativeLoader.ensureAvailability();
+        Brotli4jLoader.ensureAvailability();
     }
 
     /**

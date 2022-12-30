@@ -60,7 +60,7 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-val brotli4jVersion = "1.8.0"
+val brotli4jVersion = "1.9.0"
 
 libraryDependencies ++= Seq(
   "com.aayushatharva.brotli4j" % "brotli4j" % brotli4jVersion,
