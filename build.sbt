@@ -77,7 +77,6 @@ Compile / packageBin := assembly.value
 /* Use same packaged jar name that packageBin task */
 assembly / assemblyJarName :=  s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
 
-
 /* Exclude the scala library from being included in assembled jar*/
 assembly / assemblyOption ~= {
       _.withIncludeScala(false)
@@ -90,5 +89,11 @@ assembly / assemblyExcludedJars := {
 }
 
 
+assembly / assemblyMergeStrategy := {
+    case PathList("META-INF", "versions", xs @ _, "module-info.class") => MergeStrategy.discard
+    case x =>
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        oldStrategy(x)
+}
 
 
