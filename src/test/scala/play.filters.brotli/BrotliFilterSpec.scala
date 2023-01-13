@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2009-2016 Lightbend Inc. <https://www.lightbend.com> and Mariot Chauvin <mariot.chauvin@gmail.com>
-
  */
 package play.filters.brotli
 

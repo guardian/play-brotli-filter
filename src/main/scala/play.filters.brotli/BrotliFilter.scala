@@ -6,6 +6,7 @@ import javax.inject.{ Provider, Inject, Singleton }
 import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import play.api.http.HttpProtocol
 import play.api.inject.Module
 import play.api.{ Environment, Configuration }
 import play.api.mvc._
@@ -79,16 +80,14 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
             Result(header, compressStrictEntity(data, contentType))
           }
 
-        /*
-
-        We do not support chunked response yet.
-
+        /* FIXME -> NOT YET
         case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 =>
           // It's above the chunked threshold, but we can't chunk it because we're using HTTP 1.0.
           // Instead, we use a close delimited body (ie, regular body with no content length)
           val gzipped = data.via(createGzipFlow)
           Future.successful(
             result.copy(header = header, body = HttpEntity.Streamed(gzipped, None, contentType))
+          )
 
         case HttpEntity.Streamed(data, _, contentType) =>
           // It's above the chunked threshold, compress through the brotli flow, and send as chunked
@@ -119,12 +118,17 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
             new FlowShape(broadcast.in, concat.out)
           })
-          Future.successful(Result(header, HttpEntity.Chunked(chunks via brotliFlow, contentType)))*/
+          Future.successful(Result(header, HttpEntity.Chunked(chunks via brotliFlow, contentType)))
+          */
       }
     } else {
       Future.successful(result)
     }
   }
+
+  
+  //private def createGzipFlow: Flow[ByteString, ByteString, _] =
+  //  GzipFlow.gzip(config.bufferSize, config.compressionLevel)
 
   private def compressStrictEntity(data: ByteString, contentType: Option[String]) = {
     val builder = ByteString.newBuilder

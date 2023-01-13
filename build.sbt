@@ -60,13 +60,19 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-val brotli4jVersion = "1.9.0"
+val Brotli4jVersion = "1.9.0"
+
+val PlayVersion = "2.8.18"
+val AkkaVersion = "2.6.20"
 
 libraryDependencies ++= Seq(
-  "com.aayushatharva.brotli4j" % "brotli4j" % brotli4jVersion,
-  "com.typesafe.play" %% "play" % "2.8.15" % "provided",
-  "com.typesafe.play" %% "filters-helpers" % "2.8.15" % "test",
-  "com.typesafe.play" %% "play-specs2" % "2.8.15" % "test"
+  "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion,
+  "com.typesafe.play" %% "play" % PlayVersion % Provided,
+  "com.typesafe.play" %% "filters-helpers" % PlayVersion % Test,
+  "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
+  "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+  "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
+  "org.scalatest" %% "scalatest" % "3.1.4" % Test
 )
 
 
@@ -85,7 +91,7 @@ assembly / assemblyOption ~= {
 /* Exclude brotli4j library from being included in assembled jar*/
 assembly / assemblyExcludedJars := {
       val cp = (assembly / fullClasspath).value
-      cp filter {_.data.getName == s"brotli4j-${brotli4jVersion}.jar"}
+      cp filter {_.data.getName == s"brotli4j-${Brotli4jVersion}.jar"}
 }
 
 
