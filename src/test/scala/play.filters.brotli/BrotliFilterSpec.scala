@@ -98,22 +98,24 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
       checkNotCompressed(makeBrotliRequest(app), "")(app.materializer)
     }
 
-    /*"brotli chunked responses" in withApplication(Ok.chunked(Source(List("foo", "bar")))) { implicit app =>
+    "brotli chunked responses" in withApplication(Ok.chunked(Source(List("foo", "bar")))) { implicit app =>
       val result = makeBrotliRequest(app)
+
       checkCompressedBody(result, "foobar")(app.materializer)
       await(result).body must beAnInstanceOf[HttpEntity.Chunked]
-    }*/
+    }
 
     val body = Random.nextString(1000)
 
-    /*"not buffer more than the configured threshold" in withApplication(
+    "not buffer more than the configured threshold" in withApplication(
       Ok.sendEntity(HttpEntity.Streamed(Source.single(ByteString(body)), Some(1000), None)), chunkedThreshold = 512) { implicit app =>
         val result = makeBrotliRequest(app)
         checkCompressedBody(result, body)(app.materializer)
         await(result).body must beAnInstanceOf[HttpEntity.Chunked]
-      }*/
+      }
+    
 
-    "zip a strict body even if it exceeds the threshold" in withApplication(Ok(body), chunkedThreshold = 512) { implicit app =>
+    "brotli a strict body even if it exceeds the threshold" in withApplication(Ok(body), chunkedThreshold = 512) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressedBody(result, body)(app.materializer)
       await(result).body must beAnInstanceOf[HttpEntity.Strict]

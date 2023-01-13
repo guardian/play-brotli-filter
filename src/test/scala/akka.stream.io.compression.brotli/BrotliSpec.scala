@@ -13,7 +13,7 @@ import java.util.zip.ZipException
 
 import akka.stream.io.compression.brotli.CoderSpec
 import akka.stream.impl.io.compression.{ Compressor, GzipCompressor }
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, BrotliCompression}
 import akka.util.ByteString
 
 class BrotliSpec extends CoderSpec("brotli") {
@@ -25,8 +25,8 @@ class BrotliSpec extends CoderSpec("brotli") {
   }
 
   override protected def newCompressor(): Compressor = new BrotliCompressor
-  override protected val encoderFlow: Flow[ByteString, ByteString, Any] = Compression.brotli
-  override protected def decoderFlow(maxBytesPerChunk: Int): Flow[ByteString, ByteString, Any] = Compression.unbrotli()
+  override protected val encoderFlow: Flow[ByteString, ByteString, Any] = BrotliCompression.brotli
+  override protected def decoderFlow(maxBytesPerChunk: Int): Flow[ByteString, ByteString, Any] = BrotliCompression.unbrotli()
 
   protected def newDecodedInputStream(underlying: InputStream): InputStream =
     new BrotliInputStream(underlying)
@@ -47,20 +47,7 @@ class BrotliSpec extends CoderSpec("brotli") {
     }
     "throw an error on truncated input" in {
       val ex = the[RuntimeException] thrownBy ourDecode(streamEncode(smallTextBytes).dropRight(5))
-      ex.ultimateCause.getMessage should equal(" Brotli decompression failed - status: NEEDS_MORE_INPUT")
+      ex.ultimateCause.getMessage should equal("Truncated Brotli stream")
     }
-
-    /* TODO check if we can reinstate
-
-    "throw an error if compressed data is just missing the trailer at the end" in {
-      def brokenCompress(payload: String) = newCompressor().compress(ByteString(payload, "UTF-8"))
-      val ex = the[RuntimeException] thrownBy ourDecode(brokenCompress("abcdefghijkl"))
-      ex.ultimateCause.getMessage should equal("Truncated GZIP stream")
-    }
-    "throw early if header is corrupt" in {
-      val cause = (the[RuntimeException] thrownBy ourDecode(ByteString(0, 1, 2, 3, 4))).ultimateCause
-      cause should ((be(a[ZipException]) and have).message("Not in GZIP format"))
-    }
-    */
   }
 }

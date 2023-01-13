@@ -26,17 +26,22 @@ class BrotliDecompressor extends ByteStringParser[ByteString] {
 
       private def fail(msg: String) = throw new ZipException(msg)
 
+      override def onTruncation(): Unit = failStage(new ZipException("Truncated Brotli stream"))
+
       override def parse(reader: ByteStringParser.ByteReader): ParseResult[ByteString] = {
         if (!reader.hasRemaining) {
           ParseResult(None, ByteStringParser.FinishedParser, true) 
         } else {
-          val directDecompress = DirectDecompress.decompress(reader.remainingData.toArrayUnsafe())
+          val data = reader.remainingData.toArrayUnsafe()
+          val directDecompress = DirectDecompress.decompress(data)
           reader.skip(reader.remainingSize)
 
           val status = directDecompress.getResultStatus()
           if (status == DecoderJNI.Status.DONE) {
             val outcome = directDecompress.getDecompressedData()
             ParseResult(Some(ByteString(outcome)), this, true)
+          } else if (status == DecoderJNI.Status.NEEDS_MORE_INPUT) {
+            throw ByteStringParser.NeedMoreData
           } else {
             fail(" Brotli decompression failed - status: " + status)
           }
@@ -50,7 +55,6 @@ class BrotliDecompressor extends ByteStringParser[ByteString] {
 
   override def createLogic(attr: Attributes) = new DecompressorParsingLogic {
       startWith(DecompressStep)
-
   }
 
 }

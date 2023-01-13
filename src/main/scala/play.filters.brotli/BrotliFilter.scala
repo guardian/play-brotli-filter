@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Mariot Chauvin
+ *
+ * Mariot Chauvin licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 package play.filters.brotli
 
 import java.util.function.BiFunction
@@ -6,11 +22,12 @@ import javax.inject.{ Provider, Inject, Singleton }
 import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import com.typesafe.config.ConfigMemorySize
 import play.api.http.HttpProtocol
 import play.api.inject.Module
 import play.api.{ Environment, Configuration }
 import play.api.mvc._
-import play.core.j
+import play.api.libs.streams.BrotliFlow
 import scala.concurrent.Future
 import play.api.http.{ HttpChunk, HttpEntity, Status }
 import scala.compat.java8.FunctionConverters._
@@ -46,9 +63,10 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
   import play.api.http.HeaderNames._
 
   def this(quality: Int = 5,
+    bufferSize: Int = 8192,
     chunkedThreshold: Int = 102400,
     shouldBrotli: (RequestHeader, Result) => Boolean = (_, _) => true)(implicit mat: Materializer) = {
-      this(BrotliFilterConfig(quality, chunkedThreshold, shouldBrotli))
+      this(BrotliFilterConfig(quality, bufferSize, chunkedThreshold, shouldBrotli))
     }
 
 
@@ -74,31 +92,33 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
           Future.successful(Result(header, compressStrictEntity(data, contentType)))
 
 
-        case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) /*if contentLength <= config.chunkedThreshold*/ =>
+        case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) if contentLength <= config.chunkedThreshold =>
           // It's below the chunked threshold, so buffer then compress and send
           entity.consumeData.map { data =>
             Result(header, compressStrictEntity(data, contentType))
           }
 
-        /* FIXME -> NOT YET
-        case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 =>
+        case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 => 
           // It's above the chunked threshold, but we can't chunk it because we're using HTTP 1.0.
           // Instead, we use a close delimited body (ie, regular body with no content length)
-          val gzipped = data.via(createGzipFlow)
+          val compressed = data.via(createBrotliFlow)
           Future.successful(
-            result.copy(header = header, body = HttpEntity.Streamed(gzipped, None, contentType))
+            result.copy(header = header, body = HttpEntity.Streamed(compressed, None, contentType))
           )
 
         case HttpEntity.Streamed(data, _, contentType) =>
           // It's above the chunked threshold, compress through the brotli flow, and send as chunked
-          val compressed = data via BrotliFlow.brotli(config.quality) map (d => HttpChunk.Chunk(d))
+          val compressed = data.via(createBrotliFlow).map(d => HttpChunk.Chunk(d))
           Future.successful(Result(header, HttpEntity.Chunked(compressed, contentType)))
 
         case HttpEntity.Chunked(chunks, contentType) =>
-          val brotliFlow = Flow.fromGraph(GraphDSL.create[FlowShape[HttpChunk, HttpChunk]]() { implicit builder =>
+          val wrappedFlow = Flow.fromGraph(GraphDSL.create[FlowShape[HttpChunk, HttpChunk]]() { implicit builder =>
             import GraphDSL.Implicits._
 
             val extractChunks = Flow[HttpChunk] collect { case HttpChunk.Chunk(data) => data }
+
+            val foldData = Flow[ByteString].fold(ByteString.empty)((acc, x) => acc ++ x)
+
             val createChunks = Flow[ByteString].map[HttpChunk](HttpChunk.Chunk.apply)
             val filterLastChunk = Flow[HttpChunk]
               .filter(_.isInstanceOf[HttpChunk.LastChunk])
@@ -111,15 +131,14 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
             val concat = builder.add(Concat[HttpChunk]())
 
             // Broadcast the stream through two separate flows, one that collects chunks and turns them into
-            // ByteStrings, sends those ByteStrings through the Brotli flow, and then turns them back into chunks,
+            // ByteStrings, fold into one ByteString then sends that ByteString through the Brotli flow, and then turns them back into chunks,
             // the other that just allows the last chunk through. Then concat those two flows together.
-            broadcast.out(0) ~> extractChunks ~> BrotliFlow.brotli(config.bufferSize) ~> createChunks ~> concat.in(0)
+            broadcast.out(0) ~> extractChunks ~> foldData ~> createBrotliFlow ~> createChunks ~> concat.in(0)
             broadcast.out(1) ~> filterLastChunk ~> concat.in(1)
 
             new FlowShape(broadcast.in, concat.out)
           })
-          Future.successful(Result(header, HttpEntity.Chunked(chunks via brotliFlow, contentType)))
-          */
+          Future.successful(Result(header, HttpEntity.Chunked(chunks via wrappedFlow, contentType)))
       }
     } else {
       Future.successful(result)
@@ -127,8 +146,8 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
   }
 
   
-  //private def createGzipFlow: Flow[ByteString, ByteString, _] =
-  //  GzipFlow.gzip(config.bufferSize, config.compressionLevel)
+  private def createBrotliFlow: Flow[ByteString, ByteString, _] =
+    BrotliFlow.brotli(config.bufferSize, config.quality)
 
   private def compressStrictEntity(data: ByteString, contentType: Option[String]) = {
     val builder = ByteString.newBuilder
@@ -200,7 +219,8 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
  * @param shouldBrotli Whether the given request/result should be compressed with brotli.  This can be used, for example, to implement
  *                   black/white lists for compressing by content type.
  */
-case class BrotliFilterConfig(quality: Int = 5,
+case class BrotliFilterConfig(quality: Int = 5, //TODO check default,
+    bufferSize: Int = 8192,
     chunkedThreshold: Int = 102400,
     shouldBrotli: (RequestHeader, Result) => Boolean = (_, _) => true) {
 
@@ -210,9 +230,11 @@ case class BrotliFilterConfig(quality: Int = 5,
   def withShouldBrotli(shouldBrotli: (RequestHeader, Result) => Boolean): BrotliFilterConfig = copy(shouldBrotli = shouldBrotli)
 
   def withShouldBrotli(shouldBrotli: BiFunction[play.mvc.Http.RequestHeader, play.mvc.Result, Boolean]): BrotliFilterConfig =
-    withShouldBrotli((req: RequestHeader, res: Result) => shouldBrotli.asScala(new j.RequestHeaderImpl(req), res.asJava))
+    withShouldBrotli((req: RequestHeader, res: Result) => shouldBrotli.asScala(req.asJava, res.asJava))
 
   def withChunkedThreshold(threshold: Int): BrotliFilterConfig = copy(chunkedThreshold = threshold)
+
+  def withBufferSize(size: Int): BrotliFilterConfig = copy(bufferSize = size)
 
   def withQuality(q: Int): BrotliFilterConfig = copy(quality = q)
 }
@@ -224,8 +246,8 @@ object BrotliFilterConfig {
     val config = conf.get[Configuration]("play.filters.brotli")
 
     BrotliFilterConfig(
-      quality = config.get[Int]("quality")
-      /*,chunkedThreshold = config.get[ConfigMemorySize]("chunkedThreshold").toBytes.toInt*/
+      quality = config.get[Int]("quality"),
+      chunkedThreshold = config.get[ConfigMemorySize]("chunkedThreshold").toBytes.toInt
     )
   }
 }
