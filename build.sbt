@@ -60,15 +60,15 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-val Brotli4jVersion = "1.9.0"
+val Brotli4jVersion = "1.12.0"
 
-val PlayVersion = "2.8.18"
-val AkkaVersion = "2.6.20"
+val PlayVersion = "2.9.0-RC2"
+val AkkaVersion = "2.8.0"
 
 libraryDependencies ++= Seq(
   "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion,
   "com.typesafe.play" %% "play" % PlayVersion % Provided,
-  "com.typesafe.play" %% "filters-helpers" % PlayVersion % Test,
+  "com.typesafe.play" %% "play-filters-helpers" % PlayVersion % Test,
   "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
