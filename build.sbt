@@ -63,7 +63,7 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 val Brotli4jVersion = "1.12.0"
 
 val PlayVersion = "2.9.0-RC2"
-val AkkaVersion = "2.8.0"
+val AkkaVersion = "2.6.21"
 
 libraryDependencies ++= Seq(
   "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion,
