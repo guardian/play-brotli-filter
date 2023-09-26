@@ -130,13 +130,13 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     "preserve original Vary header values" in withApplication(Ok("hello").withHeaders(VARY -> "original")) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressed(result)
-      header(VARY, result) must beSome.which(header => header contains "original,")
+      header(VARY, result) must beSome[String].which(header => header.contains("original,"))
     }
 
     "preserve original Vary header values and not duplicate case-insensitive ACCEPT-ENCODING" in withApplication(Ok("hello").withHeaders(VARY -> "original,ACCEPT-encoding")) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressed(result)
-      header(VARY, result) must beSome.which(header => header.split(",").filter(_.toLowerCase(java.util.Locale.ENGLISH) == ACCEPT_ENCODING.toLowerCase(java.util.Locale.ENGLISH)).size == 1)
+      header(VARY, result) must beSome[String].which(header => header.split(",").filter(_.toLowerCase(java.util.Locale.ENGLISH) == ACCEPT_ENCODING.toLowerCase(java.util.Locale.ENGLISH)).size == 1)
     }
   }
 
