@@ -60,7 +60,7 @@ releaseProcess := Seq(
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-val Brotli4jVersion = "1.9.0"
+val Brotli4jVersion = "1.12.0"
 
 val PlayVersion = "2.8.18"
 val AkkaVersion = "2.6.20"
