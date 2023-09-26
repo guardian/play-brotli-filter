@@ -72,7 +72,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.1.4" % Test
+  "org.scalatest" %% "scalatest" % "3.2.17" % Test
 )
 
 
