@@ -54,8 +54,7 @@ releaseProcess := Seq(
   publishArtifacts,
   setNextVersion,
   commitNextVersion,
-  releaseStepCommand("sonatypeReleaseAll"),
-  pushChanges
+  releaseStepCommand("sonatypeReleaseAll")
 ) 
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
