@@ -16,6 +16,7 @@
 
 package play.filters.brotli
 
+
 import java.util.function.BiFunction
 import javax.inject.{ Provider, Inject, Singleton }
 
@@ -28,12 +29,12 @@ import play.api.inject.Module
 import play.api.{ Environment, Configuration }
 import play.api.mvc._
 import play.api.libs.streams.BrotliFlow
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContextExecutor, Future }
 import play.api.http.{ HttpChunk, HttpEntity, Status }
 import scala.compat.java8.FunctionConverters._
 
-import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
-import com.aayushatharva.brotli4j.encoder.Encoder;
+import com.aayushatharva.brotli4j.encoder.BrotliOutputStream
+import com.aayushatharva.brotli4j.encoder.Encoder
 
 /**
  * A brotli filter.
@@ -71,7 +72,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   def apply(next: EssentialAction) = new EssentialAction {
-    implicit val ec = mat.executionContext
+    implicit val ec: ExecutionContextExecutor = mat.executionContext
     def apply(request: RequestHeader) = {
       if (mayCompress(request)) {
         next(request).mapFuture(result => handleResult(request, result))
