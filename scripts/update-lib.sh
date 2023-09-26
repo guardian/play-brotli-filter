@@ -2,7 +2,7 @@
 
 cd ../lib/
 
-version='1.9.0' 
+version='1.12.0' 
 
 curl  -OJ -# "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-osx-aarch64/${version}/native-osx-aarch64-${version}.jar"
 curl  -OJ -# "https://repo1.maven.org/maven2/com/aayushatharva/brotli4j/native-osx-x86_64/${version}/native-osx-x86_64-${version}.jar"
