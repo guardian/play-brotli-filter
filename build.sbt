@@ -8,9 +8,9 @@ description := "A brotli filter for the play framework"
 
 licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.12"
 
-crossScalaVersions := Seq("2.13.10", "2.12.17")
+crossScalaVersions := Seq("2.13.12", "2.12.18")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -72,7 +72,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.1.4" % Test
+  "org.scalatest" %% "scalatest" % "3.2.17" % Test
 )
 
 

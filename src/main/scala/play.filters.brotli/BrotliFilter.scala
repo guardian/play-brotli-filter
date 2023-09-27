@@ -28,7 +28,7 @@ import play.api.inject.Module
 import play.api.{ Environment, Configuration }
 import play.api.mvc._
 import play.api.libs.streams.BrotliFlow
-import scala.concurrent.Future
+import scala.concurrent.{ Future, ExecutionContextExecutor}
 import play.api.http.{ HttpChunk, HttpEntity, Status }
 import scala.compat.java8.FunctionConverters._
 
@@ -71,7 +71,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   def apply(next: EssentialAction) = new EssentialAction {
-    implicit val ec = mat.executionContext
+    implicit val ec: ExecutionContextExecutor = mat.executionContext
     def apply(request: RequestHeader) = {
       if (mayCompress(request)) {
         next(request).mapFuture(result => handleResult(request, result))
