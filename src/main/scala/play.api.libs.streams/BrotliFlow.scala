@@ -18,11 +18,11 @@ package play.api.libs.streams
 
 import java.util.zip.Deflater
 
-import akka.stream.scaladsl.BrotliCompression
-import akka.stream.scaladsl.Flow
-import akka.stream.stage._
-import akka.stream._
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.BrotliCompression
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.stream.stage._
+import org.apache.pekko.stream._
+import org.apache.pekko.util.ByteString
 
 /**
  * A simple Brotli Flow
@@ -38,7 +38,7 @@ object BrotliFlow {
    */
   def brotli(
       bufferSize: Int = 512,
-      compressionLevel: Int = 9 // TODO use constants 
+      compressionLevel: Int = 9 // TODO use constants
   ): Flow[ByteString, ByteString, _] = {
     Flow[ByteString]
       .via(chunkerIfNeeded(bufferSize))

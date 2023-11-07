@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2016 Lightbend Inc. <https://www.lightbend.com> and Mariot Chauvin <mariot.chauvin@gmail.com>
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 import java.io.{ InputStream, OutputStream }
 
@@ -11,10 +11,10 @@ import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
 import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
 import java.util.zip.ZipException
 
-import akka.stream.io.compression.brotli.CoderSpec
-import akka.stream.impl.io.compression.{ Compressor, GzipCompressor }
-import akka.stream.scaladsl.{Flow, BrotliCompression}
-import akka.util.ByteString
+import org.apache.pekko.stream.io.compression.brotli.CoderSpec
+import org.apache.pekko.stream.impl.io.compression.{ Compressor, GzipCompressor }
+import org.apache.pekko.stream.scaladsl.{Flow, BrotliCompression}
+import org.apache.pekko.util.ByteString
 
 class BrotliSpec extends CoderSpec("brotli") {
   import CompressionTestingTools._
@@ -39,7 +39,7 @@ class BrotliSpec extends CoderSpec("brotli") {
 
   override def extraTests(): Unit = {
     "decode concatenated compressions" in {
-      pending //TODO is that something we could support? 
+      pending //TODO is that something we could support?
       ourDecode(Seq(encode("Hello, "), encode("dear "), encode("User!")).join) should readAs("Hello, dear User!")
     }
     "provide a similar compression ratio than the standard Brotli/Unbortli streams" in {

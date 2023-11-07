@@ -2,15 +2,15 @@
  * Copyright (C) 2009-2016 Lightbend Inc. <https://www.lightbend.com> and Mariot Chauvin <mariot.chauvin@gmail.com>
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 import java.io.{ InputStream, OutputStream }
 import java.util.zip.{ GZIPInputStream, GZIPOutputStream, ZipException }
 
-import akka.stream.io.compression.brotli.CoderSpec
-import akka.stream.impl.io.compression.{ Compressor, GzipCompressor }
-import akka.stream.scaladsl.{ Compression, Flow }
-import akka.util.ByteString
+import org.apache.pekko.stream.io.compression.brotli.CoderSpec
+import org.apache.pekko.stream.impl.io.compression.{ Compressor, GzipCompressor }
+import org.apache.pekko.stream.scaladsl.{ Compression, Flow }
+import org.apache.pekko.util.ByteString
 
 class GzipSpec extends CoderSpec("gzip") {
   import CompressionTestingTools._

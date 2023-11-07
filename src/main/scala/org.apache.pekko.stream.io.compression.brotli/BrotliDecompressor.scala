@@ -3,7 +3,7 @@
  *   - Mariot Chauvin
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 import java.nio.ByteBuffer
 import java.util.zip.Inflater
@@ -12,11 +12,11 @@ import java.util.zip.ZipException
 import com.aayushatharva.brotli4j.decoder.DirectDecompress
 import com.aayushatharva.brotli4j.decoder.DecoderJNI
 
-import akka.annotation.InternalApi
-import akka.stream.Attributes
-import akka.stream.impl.io.ByteStringParser
-import akka.stream.impl.io.ByteStringParser.{ ParseResult, ParseStep }
-import akka.util.ByteString
+import org.apache.pekko.annotation.InternalApi
+import org.apache.pekko.stream.Attributes
+import org.apache.pekko.stream.impl.io.ByteStringParser
+import org.apache.pekko.stream.impl.io.ByteStringParser.{ ParseResult, ParseStep }
+import org.apache.pekko.util.ByteString
 
 class BrotliDecompressor extends ByteStringParser[ByteString] {
 
@@ -30,7 +30,7 @@ class BrotliDecompressor extends ByteStringParser[ByteString] {
 
       override def parse(reader: ByteStringParser.ByteReader): ParseResult[ByteString] = {
         if (!reader.hasRemaining) {
-          ParseResult(None, ByteStringParser.FinishedParser, true) 
+          ParseResult(None, ByteStringParser.FinishedParser, true)
         } else {
           val data = reader.remainingData.toArrayUnsafe()
           val directDecompress = DirectDecompress.decompress(data)

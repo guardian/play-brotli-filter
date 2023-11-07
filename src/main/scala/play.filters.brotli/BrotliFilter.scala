@@ -19,9 +19,9 @@ package play.filters.brotli
 import java.util.function.BiFunction
 import javax.inject.{ Provider, Inject, Singleton }
 
-import akka.stream.{ OverflowStrategy, FlowShape, Materializer }
-import akka.stream.scaladsl._
-import akka.util.ByteString
+import org.apache.pekko.stream.{ OverflowStrategy, FlowShape, Materializer }
+import org.apache.pekko.stream.scaladsl._
+import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigMemorySize
 import play.api.http.HttpProtocol
 import play.api.inject.Module
@@ -98,7 +98,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
             Result(header, compressStrictEntity(data, contentType))
           }
 
-        case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 => 
+        case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 =>
           // It's above the chunked threshold, but we can't chunk it because we're using HTTP 1.0.
           // Instead, we use a close delimited body (ie, regular body with no content length)
           val compressed = data.via(createBrotliFlow)
@@ -145,7 +145,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
     }
   }
 
-  
+
   private def createBrotliFlow: Flow[ByteString, ByteString, _] =
     BrotliFlow.brotli(config.bufferSize, config.quality)
 

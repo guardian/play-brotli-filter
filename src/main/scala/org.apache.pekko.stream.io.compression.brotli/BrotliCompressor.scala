@@ -14,11 +14,11 @@
  * under the License.
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 
-import akka.util.ByteString
-import akka.stream.impl.io.compression.Compressor
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.stream.impl.io.compression.Compressor
 import com.aayushatharva.brotli4j.encoder.Encoder
 
 
@@ -59,20 +59,20 @@ class BrotliCompressor(level: Int = BrotliCompressor.DefaultQuality) extends Com
   override final def compressAndFinish(input: ByteString): ByteString = compress(input)
 
   /** Make sure any resources have been released */
-  override final def close(): Unit = {} 
+  override final def close(): Unit = {}
 
 }
 
 
 /*
- 
+
 
 
  public BrotliOutputStream(OutputStream destination, Encoder.Parameters params)
 
 
 
- 
+
 
  */
 

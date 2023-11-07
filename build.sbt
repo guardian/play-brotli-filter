@@ -55,22 +55,23 @@ releaseProcess := Seq(
   setNextVersion,
   commitNextVersion,
   releaseStepCommand("sonatypeReleaseAll")
-) 
+)
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-val Brotli4jVersion = "1.12.0"
+val Brotli4jVersion = "1.13.0"
 
-val PlayVersion = "2.9.0"
-val AkkaVersion = "2.6.21"
+val PlayVersion  = "3.0.0"
+val PekkoVersion = "1.0.1"
 
 libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
   "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion,
-  "com.typesafe.play" %% "play" % PlayVersion % Provided,
-  "com.typesafe.play" %% "filters-helpers" % "2.9.0-M6" % Test,
-  "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
-  "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
-  "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
+  "org.playframework" %% "play" % PlayVersion % Provided,
+  "org.playframework" %% "play-filters-helpers" % PlayVersion % Test,
+  "org.playframework" %% "play-specs2" % PlayVersion % Test,
+  "org.apache.pekko" %% "pekko-stream" % PekkoVersion % Provided,
+  "org.apache.pekko" %% "pekko-stream-testkit" % PekkoVersion % Test,
   "org.scalatest" %% "scalatest" % "3.2.17" % Test
 )
 
