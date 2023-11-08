@@ -10,7 +10,7 @@ licenses := Seq("Apache v2" -> url("http://www.apache.org/licenses/LICENSE-2.0.h
 
 scalaVersion := "2.13.12"
 
-crossScalaVersions := Seq("2.13.12", "2.12.18")
+crossScalaVersions := Seq("2.13.12", "3.3.1")
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 
@@ -54,21 +54,20 @@ releaseProcess := Seq(
   publishArtifacts,
   setNextVersion,
   commitNextVersion,
-  releaseStepCommand("sonatypeReleaseAll"),
-  pushChanges
+  releaseStepCommand("sonatypeReleaseAll")
 ) 
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 val Brotli4jVersion = "1.12.0"
 
-val PlayVersion = "2.8.20"
+val PlayVersion = "2.9.0"
 val AkkaVersion = "2.6.21"
 
 libraryDependencies ++= Seq(
   "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion,
   "com.typesafe.play" %% "play" % PlayVersion % Provided,
-  "com.typesafe.play" %% "filters-helpers" % PlayVersion % Test,
+  "com.typesafe.play" %% "filters-helpers" % "2.9.0-M6" % Test,
   "com.typesafe.play" %% "play-specs2" % PlayVersion % Test,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
   "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
