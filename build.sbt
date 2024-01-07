@@ -10,11 +10,20 @@ val Scala3 = "3.3.1"
 
 ThisBuild / scalaVersion := Scala213
 
+ThisBuild / publishTo := Some(
+      if (isSnapshot.value)
+        Opts.resolver.sonatypeOssSnapshots.head /* Take first repo */
+      else
+        Opts.resolver.sonatypeStaging
+    )
+
 lazy val sharedSettings = Seq(
   scalacOptions ++= Seq("-feature", "-deprecation"),
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.17" % Test
-  )
+  ),
+  Test / publishArtifact := false,
+  publishConfiguration := publishConfiguration.value.withOverwrite(true)
 )
 
 val Brotli4jVersion = "1.12.0"
@@ -169,29 +178,19 @@ lazy val `play-brotli-filter-root` = (project in file("."))
   .aggregate(akka, pekko, `play-v28`,`play-v29` ,`play-v30`)
   .settings(
     publish / skip := true,
+    crossScalaVersions := Nil,
 
-    releaseCrossBuild := true,
-
-    Test / publishArtifact := false,
-
-    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-
-    publishTo := Some(
-      if (isSnapshot.value)
-        Opts.resolver.sonatypeOssSnapshots.head /* Take first repo */
-      else
-        Opts.resolver.sonatypeStaging
-    ),
-
+    /* deactivate cross-building and use `+` on `test` and `publishSigned` see https://www.scala-sbt.org/1.x/docs/Cross-Build.html */
+    releaseCrossBuild := false,
     releaseProcess := Seq(
       checkSnapshotDependencies,
       inquireVersions,
       runClean,
-      runTest,
+      releaseStepCommandAndRemaining("+test"),
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
-      publishArtifacts,
+      releaseStepCommandAndRemaining("+publishSigned"),
       setNextVersion,
       commitNextVersion,
       releaseStepCommand("sonatypeReleaseAll")
