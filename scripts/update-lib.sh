@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd ../lib/
+cd ../common/lib/
 
 version='1.12.0' 
 

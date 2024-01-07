@@ -149,6 +149,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
   def withApplication[T](result: Result, quality: Int = 5, chunkedThreshold: Int = 1024)(block: Application => T): T = {
     val application = new GuiceApplicationBuilder()
       .configure(
+        "akka.loglevel" -> "OFF",
         "play.filters.brotli.quality" -> quality,
         "play.filters.brotli.chunkedThreshold" -> chunkedThreshold
       ).overrides(
