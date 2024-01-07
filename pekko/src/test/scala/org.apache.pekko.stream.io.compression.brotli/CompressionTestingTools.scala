@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2018-2022 Lightbend Inc. <https://www.lightbend.com>
+ * Copyright (C) 2018-2023 Lightbend Inc. <https://www.lightbend.com>
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 import scala.annotation.tailrec
 import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration.Duration
 import scala.util.{ Failure, Success }
 
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import akka.util.ccompat._
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.util.ccompat._
 
-// a few useful helpers copied over from akka-http
+// a few useful helpers copied over from pekko-http
 @ccompatUsedUntil213
 object CompressionTestingTools {
   implicit class AddFutureAwaitResult[T](val future: Future[T]) extends AnyVal {

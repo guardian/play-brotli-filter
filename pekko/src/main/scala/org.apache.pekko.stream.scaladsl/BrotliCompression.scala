@@ -14,14 +14,14 @@
  * under the License.
  */
 
-package akka.stream.scaladsl
+package org.apache.pekko.stream.scaladsl
 
-import akka.NotUsed
-import akka.stream.impl.io.compression._
-import akka.stream.scaladsl.Flow
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.impl.io.compression._
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.util.ByteString
 
-import akka.stream.io.compression.brotli.{BrotliCompressor, BrotliDecompressor}
+import org.apache.pekko.stream.io.compression.brotli.{BrotliCompressor, BrotliDecompressor}
 
 object BrotliCompression {
 

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2009-2022 Lightbend Inc. <https://www.lightbend.com>
+ * Copyright (C) 2009-2023 Lightbend Inc. <https://www.lightbend.com>
  */
 
-package akka.stream.io.compression.brotli
+package org.apache.pekko.stream.io.compression.brotli
 
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream }
 import java.util.concurrent.ThreadLocalRandom
@@ -16,10 +16,10 @@ import scala.util.control.NoStackTrace
 import org.scalatest.Inspectors
 import org.scalatest.wordspec.AnyWordSpec
 
-import akka.NotUsed
-import akka.stream.impl.io.compression.Compressor
-import akka.stream.scaladsl.{ Compression, Flow, Sink, Source }
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.impl.io.compression.Compressor
+import org.apache.pekko.stream.scaladsl.{ Compression, Flow, Sink, Source }
+import org.apache.pekko.util.ByteString
 
 abstract class CoderSpec(codecName: String) extends AnyWordSpec with CodecSpecSupport with Inspectors {
   import CompressionTestingTools._

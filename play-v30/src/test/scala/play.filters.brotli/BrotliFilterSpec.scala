@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009-2016 Lightbend Inc. <https://www.lightbend.com> and Mariot Chauvin <mariot.chauvin@gmail.com>
+ * Copyright (C) 2009-2023 Lightbend Inc. <https://www.lightbend.com> and Mariot Chauvin <mariot.chauvin@gmail.com>
  */
 package play.filters.brotli
 
 import javax.inject.Inject
 
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import play.api.Application
 import play.api.http.{ HttpEntity, HttpFilters }
 import play.api.inject._
@@ -113,7 +113,7 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
         checkCompressedBody(result, body)(app.materializer)
         await(result).body must beAnInstanceOf[HttpEntity.Chunked]
       }
-    
+  
 
     "brotli a strict body even if it exceeds the threshold" in withApplication(Ok(body), chunkedThreshold = 512) { implicit app =>
       val result = makeBrotliRequest(app)

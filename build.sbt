@@ -44,6 +44,24 @@ lazy val akka = project.dependsOn(common)
     assemblySettings
   )
 
+val PekkoVersion = "1.0.2"
+lazy val pekko = project.dependsOn(common)
+  .settings(
+    name:="pekko-stream-brotli",
+    description := "A brotli stream extension for Pekko 1.0",
+    sharedSettings,
+    crossScalaVersions := Seq(Scala213, Scala3),
+    libraryDependencies ++= Seq(
+      "org.apache.pekko" %% "pekko-stream" % PekkoVersion % Provided,
+      "org.apache.pekko" %% "pekko-stream-testkit" % PekkoVersion % Test,
+    ),
+
+    artifactPomMetadataSettings,
+
+    assemblySettings
+  )
+
+
 val artifactPomMetadataSettings = Seq(
   organization := "com.gu",
   licenses := Seq("Apache V2" -> url("https://www.apache.org/licenses/LICENSE-2.0.html")),
@@ -128,9 +146,27 @@ lazy val `play-v29` = project
     assemblySettings
   )
 
+  lazy val `play-v30` = project
+  .dependsOn(pekko)
+  .settings(
+    sharedSettings,
+    name:="play-v30-brotli-filter",
+    description := "A brotli filter module for Play 3",
+    crossScalaVersions := Seq(Scala213, Scala3),
+    libraryDependencies ++= Seq( 
+      "org.playframework" %% "play" % "3.0.1" % Provided,
+      "org.playframework" %% "play-filters-helpers" % "3.0.1" % Test,
+      "org.playframework" %% "play-specs2" % "3.0.1" % Test,
+    ),
+
+    artifactPomMetadataSettings,
+
+    assemblySettings
+  )
+
 
 lazy val `play-brotli-filter-root` = (project in file("."))
-  .aggregate(akka, `play-v28`,`play-v29`)
+  .aggregate(akka, pekko, `play-v28`,`play-v29` ,`play-v30`)
   .settings(
     publish / skip := true,
 
