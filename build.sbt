@@ -175,6 +175,7 @@ lazy val `play-brotli-filter-root` = (project in file("."))
     publish / skip := true,
     crossScalaVersions := Nil,
 
+    organization := "com.gu",
     /* deactivate cross-building and use `+` on `test` and `publishSigned` see https://www.scala-sbt.org/1.x/docs/Cross-Build.html */
     releaseCrossBuild := false,
     releaseProcess := Seq(
@@ -186,8 +187,8 @@ lazy val `play-brotli-filter-root` = (project in file("."))
       commitReleaseVersion,
       tagRelease,
       releaseStepCommandAndRemaining("+publishSigned"),
+      releaseStepCommand("sonatypeBundleRelease"),
       setNextVersion,
       commitNextVersion,
-      releaseStepCommand("sonatypeBundleRelease")
     )
   )
