@@ -10,12 +10,7 @@ val Scala3 = "3.3.1"
 
 ThisBuild / scalaVersion := Scala213
 
-ThisBuild / publishTo := Some(
-      if (isSnapshot.value)
-        Opts.resolver.sonatypeOssSnapshots.head /* Take first repo */
-      else
-        Opts.resolver.sonatypeStaging
-    )
+ThisBuild / publishTo := sonatypePublishToBundle.value
 
 lazy val sharedSettings = Seq(
   scalacOptions ++= Seq("-feature", "-deprecation"),
@@ -193,6 +188,6 @@ lazy val `play-brotli-filter-root` = (project in file("."))
       releaseStepCommandAndRemaining("+publishSigned"),
       setNextVersion,
       commitNextVersion,
-      releaseStepCommand("sonatypeReleaseAll")
+      releaseStepCommand("sonatypeBundleRelease")
     )
   )
