@@ -24,6 +24,8 @@ lazy val sharedSettings = Seq(
 val Brotli4jVersion = "1.15.0"
 lazy val common = project
   .settings(
+    name:="brotli4s",
+    description := "A scala wrapper for brotli4j",
     sharedSettings,
     crossScalaVersions := Seq(Scala212, Scala213, Scala3),
     libraryDependencies ++= Seq(
@@ -170,7 +172,7 @@ lazy val `play-v29` = project
 
 
 lazy val `play-brotli-filter-root` = (project in file("."))
-  .aggregate(akka, pekko, `play-v28`,`play-v29` ,`play-v30`)
+  .aggregate(common, akka, pekko, `play-v28`,`play-v29` ,`play-v30`)
   .settings(
     publish / skip := true,
     crossScalaVersions := Nil,
