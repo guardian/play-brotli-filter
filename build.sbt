@@ -30,7 +30,11 @@ lazy val common = project
     crossScalaVersions := Seq(Scala212, Scala213, Scala3),
     libraryDependencies ++= Seq(
       "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion
-    )
+    ),
+
+    artifactPomMetadataSettings,
+
+    assemblySettings
   )
 
 val AkkaVersion = "2.6.21"
