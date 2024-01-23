@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package play.filters.brotli;
+package brotli4s;
 
 import com.aayushatharva.brotli4j.Brotli4jLoader;
 import java.security.AccessController;
