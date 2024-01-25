@@ -17,6 +17,10 @@ import play.api.test._
 import play.api.mvc.{ AnyContentAsEmpty, Action, DefaultActionBuilder, Result }
 import play.api.mvc.Results._
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.nio.file.Path
+import java.nio.file.Files
+import akka.stream.scaladsl.FileIO
 import org.apache.commons.io.IOUtils
 import scala.concurrent.Future
 import scala.util.Random
@@ -121,6 +125,17 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
       await(result).body must beAnInstanceOf[HttpEntity.Strict]
     }
 
+    val path: Path = Path.of(getClass.getResource("/bootstrap.min.css").toURI())
+    val source = akka.stream.scaladsl.FileIO.fromPath(path)
+    val contentLength = Files.size(path)
+
+    "brotli entire content for large files" in withApplication(
+      Ok.sendEntity(HttpEntity.Streamed(source, Some(contentLength), Some("text/css"))), chunkedThreshold = 512) { implicit app =>
+        val result = makeBrotliRequest(app)
+        checkCompressedBodyLength(result, contentLength)(app.materializer)
+        await(result).body must beAnInstanceOf[HttpEntity.Chunked]
+    }
+
     "preserve original headers" in withApplication(Ok("hello").withHeaders(SERVER -> "Play")) { implicit app =>
       val result = makeBrotliRequest(app)
       checkCompressed(result)
@@ -173,10 +188,24 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
     result
   }
 
+  def uncompressBytes(bytes: ByteString): Array[Byte] = {
+    val is = new BrotliInputStream(new ByteArrayInputStream(bytes.toArray))
+    val result = IOUtils.toByteArray(is)
+    is.close()
+    result
+  }
   def checkCompressed(result: Future[Result]): MatchResult[Option[String]] = {
     header(CONTENT_ENCODING, result) aka "Content encoding header" must beSome("br")
   }
 
+  def checkCompressedBodyLength(result: Future[Result], contentLength: Long)(implicit mat: Materializer): MatchResult[Any] = {
+    checkCompressed(result)
+    val resultBody = contentAsBytes(result)
+    await(result).body.contentLength.foreach { cl =>
+      resultBody.length must_== cl
+    }
+    uncompressBytes(resultBody).length must_== contentLength
+  }
   def checkCompressedBody(result: Future[Result], body: String)(implicit mat: Materializer): MatchResult[Any] = {
     checkCompressed(result)
     val resultBody = contentAsBytes(result)

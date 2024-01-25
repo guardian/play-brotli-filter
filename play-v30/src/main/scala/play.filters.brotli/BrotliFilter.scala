@@ -57,7 +57,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
 
   {
-    Brotli.ensureAvailability()
+    brotli4s.Brotli.ensureAvailability()
   }
 
   import play.api.http.HeaderNames._
