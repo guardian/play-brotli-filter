@@ -30,6 +30,9 @@ object BrotliCompressor {
 
 class BrotliCompressor(level: Int = BrotliCompressor.DefaultQuality) extends Compressor {
 
+  val params = new Encoder.Parameters().setQuality(level)
+  val buffer = scala.collection.mutable.ListBuffer.empty[ByteString]
+
   /**
    * Compresses the given input and returns compressed data. The implementation
    * can and will choose to buffer output data to improve compression. Use
@@ -37,26 +40,36 @@ class BrotliCompressor(level: Int = BrotliCompressor.DefaultQuality) extends Com
    * compressed and pending output data has been returned.
    */
   override final def compress(input: ByteString): ByteString = {
-     val output = Encoder.compress(input.toArray, new Encoder.Parameters().setQuality(level))
-     ByteString(output)
+     buffer += input
+     ByteString.empty
   }
 
   /**
    * Flushes any output data and returns the currently remaining compressed data.
    */
-  override final def flush(): ByteString = ByteString.empty
+  override final def flush(): ByteString = {
+    ByteString.empty
+  }
 
   /**
    * Closes this compressed stream and return the remaining compressed data. After
    * calling this method, this Compressor cannot be used any further.
    */
-  override final def finish(): ByteString = ByteString.empty
+  override final def finish(): ByteString = {
+    val input: ByteString = buffer.toList.foldLeft(ByteString.empty)(_ ++ _)
+    val output = Encoder.compress(input.toArray, params)
+    ByteString(output)
+  }
 
   /** Combines `compress` + `flush` */
-  override final def compressAndFlush(input: ByteString): ByteString = compress(input)
+  override final def compressAndFlush(input: ByteString): ByteString = {
+    compress(input)
+  }
 
   /** Combines `compress` + `finish` */
-  override final def compressAndFinish(input: ByteString): ByteString = compress(input)
+  override final def compressAndFinish(input: ByteString): ByteString = {
+    compress(input) ++ finish()
+  }
 
   /** Make sure any resources have been released */
   override final def close(): Unit = {} 
