@@ -49,9 +49,9 @@ lazy val akka = project.dependsOn(common)
       "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
     ),
 
-    artifactPomMetadataSettings,
+    artifactPomMetadataSettings
 
-    assemblySettings
+
   )
 
 val PekkoVersion = "1.0.2"
@@ -66,9 +66,8 @@ lazy val pekko = project.dependsOn(common)
       "org.apache.pekko" %% "pekko-stream-testkit" % PekkoVersion % Test,
     ),
 
-    artifactPomMetadataSettings,
+    artifactPomMetadataSettings
 
-    assemblySettings
   )
 
 
@@ -133,9 +132,7 @@ lazy val `play-v28` = project
       "ch.qos.logback" % "logback-classic" % "1.4.14"  % Test
     ),
 
-    artifactPomMetadataSettings,
-
-    assemblySettings,
+    artifactPomMetadataSettings
   )
 
 lazy val `play-v29` = project
@@ -151,9 +148,7 @@ lazy val `play-v29` = project
       "com.typesafe.play" %% "play-specs2" % "2.9.1" % Test,
     ),
 
-    artifactPomMetadataSettings,
-
-    assemblySettings
+    artifactPomMetadataSettings
   )
 
   lazy val `play-v30` = project
@@ -169,9 +164,7 @@ lazy val `play-v29` = project
       "org.playframework" %% "play-specs2" % "3.0.1" % Test,
     ),
 
-    artifactPomMetadataSettings,
-
-    assemblySettings
+    artifactPomMetadataSettings
   )
 
 
