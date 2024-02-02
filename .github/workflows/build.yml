@@ -24,7 +24,12 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
           cache: 'sbt'
- 
+          
+      - name: Setup SBT
+        if: matrix.os == 'macos-14'
+        run: |
+          brew install sbt
+
       - name: Build
         run: |
           ./scripts/build.sh
