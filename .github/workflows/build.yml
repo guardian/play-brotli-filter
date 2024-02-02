@@ -10,7 +10,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-14, macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -24,7 +24,12 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
           cache: 'sbt'
- 
+          
+      - name: Setup SBT
+        if: matrix.os == 'macos-14'
+        run: |
+          brew install sbt
+
       - name: Build
         run: |
           ./scripts/build.sh
