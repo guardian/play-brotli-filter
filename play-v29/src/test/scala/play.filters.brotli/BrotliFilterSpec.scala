@@ -27,6 +27,7 @@ import scala.util.Random
 import org.specs2.matcher.{DataTables, MatchResult}
 
 import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
+import play.api.mvc.Cookie
 
 object BrotliFilterSpec extends PlaySpecification with DataTables {
 
@@ -140,6 +141,18 @@ object BrotliFilterSpec extends PlaySpecification with DataTables {
       val result = makeBrotliRequest(app)
       checkCompressed(result)
       header(SERVER, result) must beSome("Play")
+    }
+
+    "preserve original cookies" in withApplication(Ok("hello").withCookies(Cookie("foo", "bar"))) { implicit app =>
+      val result = makeBrotliRequest(app)
+      checkCompressed(result)
+      cookies(result).get("foo") must beSome(Cookie("foo", "bar"))
+    }
+
+    "preserve original session" in withApplication(Ok("hello").withSession("foo" -> "bar")) { implicit app =>
+      val result = makeBrotliRequest(app)
+      checkCompressed(result)
+      session(result).get("foo") must beSome("bar")
     }
 
     "preserve original Vary header values" in withApplication(Ok("hello").withHeaders(VARY -> "original")) { implicit app =>
