@@ -89,13 +89,12 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
       result.body match {
 
         case HttpEntity.Strict(data, contentType) =>
-          Future.successful(Result(header, compressStrictEntity(data, contentType)))
-
+          Future.successful(result.copy(header = header, body = compressStrictEntity(data, contentType)))
 
         case entity @ HttpEntity.Streamed(_, Some(contentLength), contentType) if contentLength <= config.chunkedThreshold =>
           // It's below the chunked threshold, so buffer then compress and send
           entity.consumeData.map { data =>
-            Result(header, compressStrictEntity(data, contentType))
+            result.copy(header = header, body = compressStrictEntity(data, contentType))
           }
 
         case HttpEntity.Streamed(data, _, contentType) if request.version == HttpProtocol.HTTP_1_0 =>
@@ -109,7 +108,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
         case HttpEntity.Streamed(data, _, contentType) =>
           // It's above the chunked threshold, compress through the brotli flow, and send as chunked
           val compressed = data.via(createBrotliFlow).map(d => HttpChunk.Chunk(d))
-          Future.successful(Result(header, HttpEntity.Chunked(compressed, contentType)))
+          Future.successful(result.copy(header = header, body = HttpEntity.Chunked(compressed, contentType)))
 
         case HttpEntity.Chunked(chunks, contentType) =>
           val wrappedFlow = Flow.fromGraph(GraphDSL.create[FlowShape[HttpChunk, HttpChunk]]() { implicit builder =>
@@ -138,7 +137,7 @@ class BrotliFilter @Inject() (config: BrotliFilterConfig)(implicit mat: Material
 
             new FlowShape(broadcast.in, concat.out)
           })
-          Future.successful(Result(header, HttpEntity.Chunked(chunks via wrappedFlow, contentType)))
+          Future.successful(result.copy(header = header, body = HttpEntity.Chunked(chunks via wrappedFlow, contentType)))
       }
     } else {
       Future.successful(result)
