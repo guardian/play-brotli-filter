@@ -21,7 +21,7 @@ lazy val sharedSettings = Seq(
   publishConfiguration := publishConfiguration.value.withOverwrite(true)
 )
 
-val Brotli4jVersion = "1.15.0"
+val Brotli4jVersion = "1.16.0"
 lazy val common = project
   .settings(
     name:="brotli4s",
