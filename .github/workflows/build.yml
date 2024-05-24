@@ -28,7 +28,7 @@ jobs:
           cache: 'sbt'
           
       - name: Setup SBT
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-14' || matrix.os == 'macos-latest'
         run: |
           brew install sbt
 
