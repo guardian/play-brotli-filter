@@ -129,7 +129,10 @@ lazy val `play-v28` = project
       "com.typesafe.play" %% "play" % "2.8.21" % Provided,
       "com.typesafe.play" %% "filters-helpers" % "2.8.21" % Test,
       "com.typesafe.play" %% "play-specs2" % "2.8.21" % Test,
-      "ch.qos.logback" % "logback-classic" % "1.4.14"  % Test
+      "ch.qos.logback" % "logback-classic" % "1.4.14"  % Test,
+      /* override guice version below to fix reflection issue see https://github.com/google/guice/issues/1133 */
+      "com.google.inject" % "guice" % "6.0.0" % Test,
+      "com.google.inject.extensions" % "guice-assistedinject" % "6.0.0" % Test
     ),
 
     artifactPomMetadataSettings
