@@ -3,9 +3,9 @@ import sbtrelease.ReleaseStateTransformations._
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 
-val Scala212 = "2.12.18"
-val Scala213 = "2.13.12"
-val Scala3 = "3.3.1"
+val Scala212 = "2.12.19"
+val Scala213 = "2.13.13"
+val Scala3 = "3.3.3"
 
 
 ThisBuild / scalaVersion := Scala213
@@ -21,7 +21,7 @@ lazy val sharedSettings = Seq(
   publishConfiguration := publishConfiguration.value.withOverwrite(true)
 )
 
-val Brotli4jVersion = "1.15.0"
+val Brotli4jVersion = "1.16.0"
 lazy val common = project
   .settings(
     name:="brotli4s",
