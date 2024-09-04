@@ -146,9 +146,9 @@ lazy val `play-v29` = project
     description := "A brotli filter module for Play 2.9",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
-      "com.typesafe.play" %% "play" % "2.9.3" % Provided,
+      "com.typesafe.play" %% "play" % "2.9.5" % Provided,
       "com.typesafe.play" %% "filters-helpers" % "2.9.0-M6" % Test,
-      "com.typesafe.play" %% "play-specs2" % "2.9.3" % Test,
+      "com.typesafe.play" %% "play-specs2" % "2.9.5" % Test,
     ),
 
     artifactPomMetadataSettings
@@ -162,9 +162,9 @@ lazy val `play-v29` = project
     description := "A brotli filter module for Play 3",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
-      "org.playframework" %% "play" % "3.0.3" % Provided,
-      "org.playframework" %% "play-filters-helpers" % "3.0.3" % Test,
-      "org.playframework" %% "play-specs2" % "3.0.3" % Test,
+      "org.playframework" %% "play" % "3.0.5" % Provided,
+      "org.playframework" %% "play-filters-helpers" % "3.0.5" % Test,
+      "org.playframework" %% "play-specs2" % "3.0.5" % Test,
     ),
 
     artifactPomMetadataSettings
