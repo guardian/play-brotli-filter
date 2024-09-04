@@ -54,7 +54,7 @@ lazy val akka = project.dependsOn(common)
 
   )
 
-val PekkoVersion = "1.0.2"
+val PekkoVersion = "1.0.3"
 lazy val pekko = project.dependsOn(common)
   .settings(
     name:="pekko-stream-brotli",
