@@ -21,7 +21,7 @@ lazy val sharedSettings = Seq(
   publishConfiguration := publishConfiguration.value.withOverwrite(true)
 )
 
-val Brotli4jVersion = "1.17.0"
+val Brotli4jVersion = "1.18.0"
 lazy val common = project
   .settings(
     name:="brotli4s",
@@ -146,9 +146,9 @@ lazy val `play-v29` = project
     description := "A brotli filter module for Play 2.9",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
-      "com.typesafe.play" %% "play" % "2.9.5" % Provided,
+      "com.typesafe.play" %% "play" % "2.9.6" % Provided,
       "com.typesafe.play" %% "filters-helpers" % "2.9.0-M6" % Test,
-      "com.typesafe.play" %% "play-specs2" % "2.9.5" % Test,
+      "com.typesafe.play" %% "play-specs2" % "2.9.6" % Test,
     ),
 
     artifactPomMetadataSettings
@@ -162,9 +162,9 @@ lazy val `play-v29` = project
     description := "A brotli filter module for Play 3",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
-      "org.playframework" %% "play" % "3.0.5" % Provided,
-      "org.playframework" %% "play-filters-helpers" % "3.0.5" % Test,
-      "org.playframework" %% "play-specs2" % "3.0.5" % Test,
+      "org.playframework" %% "play" % "3.0.6" % Provided,
+      "org.playframework" %% "play-filters-helpers" % "3.0.6" % Test,
+      "org.playframework" %% "play-specs2" % "3.0.6" % Test,
     ),
 
     artifactPomMetadataSettings

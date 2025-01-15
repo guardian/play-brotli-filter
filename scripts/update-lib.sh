@@ -2,7 +2,7 @@
 
 cd ../common/lib/
 
-version='1.17.0'
+version='1.18.0'
 
 for platform in 'native-osx-aarch64' \
                 'native-osx-x86_64' \

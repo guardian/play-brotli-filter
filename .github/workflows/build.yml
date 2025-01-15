@@ -26,11 +26,14 @@ jobs:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
           cache: 'sbt'
-          
+
       - name: Setup SBT
-        if: matrix.os == 'macos-14' || matrix.os == 'macos-latest'
+        uses: sbt/setup-sbt@v1
+
+      - name: Set local hostname
+        if: runner.os == 'macOS'
         run: |
-          brew install sbt
+          sudo scutil --set HostName $(scutil --get LocalHostName)
 
       - name: Build
         run: |
