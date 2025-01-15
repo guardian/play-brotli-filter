@@ -30,6 +30,11 @@ jobs:
       - name: Setup SBT
         uses: sbt/setup-sbt@v1
 
+      - name: Set local hostname
+        if: runner.os == 'macOS'
+        run: |
+          sudo scutil --set HostName $(scutil --get LocalHostName)
+
       - name: Build
         run: |
           ./scripts/build.sh
