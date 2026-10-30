@@ -1,4 +1,5 @@
-import sbtrelease.ReleaseStateTransformations._
+import sbtrelease.ReleaseStateTransformations.*
+import sbtversionpolicy.withsbtrelease.ReleaseVersion
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
@@ -7,26 +8,18 @@ val Scala212 = "2.12.20"
 val Scala213 = "2.13.15"
 val Scala3 = "3.3.4"
 
-
 ThisBuild / scalaVersion := Scala213
+ThisBuild / scalacOptions ++= Seq("-feature", "-deprecation", "-release:11")
+ThisBuild / Test / publishArtifact := false
+ThisBuild / publishConfiguration := publishConfiguration.value.withOverwrite(true)
 
-ThisBuild / publishTo := sonatypePublishToBundle.value
-
-lazy val sharedSettings = Seq(
-  scalacOptions ++= Seq("-feature", "-deprecation"),
-  libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.2.17" % Test
-  ),
-  Test / publishArtifact := false,
-  publishConfiguration := publishConfiguration.value.withOverwrite(true)
-)
+val scalatestVersion = "3.2.17"
 
 val Brotli4jVersion = "1.18.0"
 lazy val common = project
   .settings(
-    name:="brotli4s",
+    name := "brotli4s",
     description := "A scala wrapper for brotli4j",
-    sharedSettings,
     crossScalaVersions := Seq(Scala212, Scala213, Scala3),
     libraryDependencies ++= Seq(
       "com.aayushatharva.brotli4j" % "brotli4j" % Brotli4jVersion
@@ -40,54 +33,38 @@ lazy val common = project
 val AkkaVersion = "2.6.21"
 lazy val akka = project.dependsOn(common)
   .settings(
-    name:="akka-stream-brotli",
+    name := "akka-stream-brotli",
     description := "A brotli stream extension for Akka 2.6",
-    sharedSettings,
     crossScalaVersions := Seq(Scala212, Scala213, Scala3),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-stream" % AkkaVersion % Provided,
       "com.typesafe.akka" %% "akka-stream-testkit" % AkkaVersion % Test,
+      "org.scalatest" %% "scalatest" % scalatestVersion % Test
     ),
 
     artifactPomMetadataSettings
-
-
   )
 
 val PekkoVersion = "1.0.3"
 lazy val pekko = project.dependsOn(common)
   .settings(
-    name:="pekko-stream-brotli",
+    name := "pekko-stream-brotli",
     description := "A brotli stream extension for Pekko 1.0",
-    sharedSettings,
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq(
       "org.apache.pekko" %% "pekko-stream" % PekkoVersion % Provided,
       "org.apache.pekko" %% "pekko-stream-testkit" % PekkoVersion % Test,
+      "org.scalatest" %% "scalatest" % scalatestVersion % Test
     ),
 
     artifactPomMetadataSettings
-
   )
 
 
 val artifactPomMetadataSettings = Seq(
   organization := "com.gu",
   licenses := Seq("Apache V2" -> url("https://www.apache.org/licenses/LICENSE-2.0.html")),
-  scmInfo := Some(ScmInfo(
-  url("https://github.com/guardian/play-brotli-filter"),
-    "scm:git:git@github.com:guardian/play-brotli-filter.git"
-  )),
-  pomExtra := {
-    <url>https://github.com/guardian/play-brotli-filter</url>
-      <developers>
-        <developer>
-          <id>mchv</id>
-          <name>Mariot Chauvin</name>
-          <url>https://github.com/mchv</url>
-        </developer>
-      </developers>
-  }
+  scalacOptions += "-release:11"
 )
 
 val assemblySettings = Seq( 
@@ -121,8 +98,7 @@ val assemblySettings = Seq(
 lazy val `play-v28` = project
   .dependsOn(akka)
   .settings(
-    sharedSettings,
-    name:="play-v28-brotli-filter",
+    name := "play-v28-brotli-filter",
     description := "A brotli filter module for Play 2.8",
     crossScalaVersions := Seq(Scala212, Scala213),
     libraryDependencies ++= Seq(
@@ -141,8 +117,7 @@ lazy val `play-v28` = project
 lazy val `play-v29` = project
   .dependsOn(akka)
   .settings(
-    sharedSettings,
-    name:="play-v29-brotli-filter",
+    name := "play-v29-brotli-filter",
     description := "A brotli filter module for Play 2.9",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
@@ -154,11 +129,10 @@ lazy val `play-v29` = project
     artifactPomMetadataSettings
   )
 
-  lazy val `play-v30` = project
+lazy val `play-v30` = project
   .dependsOn(pekko)
   .settings(
-    sharedSettings,
-    name:="play-v30-brotli-filter",
+    name := "play-v30-brotli-filter",
     description := "A brotli filter module for Play 3",
     crossScalaVersions := Seq(Scala213, Scala3),
     libraryDependencies ++= Seq( 
@@ -176,21 +150,17 @@ lazy val `play-brotli-filter-root` = (project in file("."))
   .settings(
     publish / skip := true,
     crossScalaVersions := Nil,
-
     organization := "com.gu",
-    /* deactivate cross-building and use `+` on `test` and `publishSigned` see https://www.scala-sbt.org/1.x/docs/Cross-Build.html */
-    releaseCrossBuild := false,
+    releaseVersion := ReleaseVersion.fromAggregatedAssessedCompatibilityWithLatestRelease().value,
     releaseProcess := Seq(
       checkSnapshotDependencies,
       inquireVersions,
       runClean,
-      releaseStepCommandAndRemaining("+test"),
+      runTest,
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
-      releaseStepCommandAndRemaining("+publishSigned"),
-      releaseStepCommand("sonatypeBundleRelease"),
       setNextVersion,
-      commitNextVersion,
+      commitNextVersion
     )
   )
