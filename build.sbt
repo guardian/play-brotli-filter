@@ -4,9 +4,9 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 
-val Scala212 = "2.12.20"
-val Scala213 = "2.13.15"
-val Scala3 = "3.3.4"
+val Scala212 = "2.12.21"
+val Scala213 = "2.13.18"
+val Scala3 = "3.3.9"
 
 ThisBuild / scalaVersion := Scala213
 ThisBuild / scalacOptions ++= Seq("-feature", "-deprecation", "-release:11")
