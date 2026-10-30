@@ -10,8 +10,8 @@ jobs:
     name: Build
     strategy:
       matrix:
-        os: [macos-14, macos-latest, ubuntu-latest, windows-latest]
-        java: [ '11', '17', '21' ]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        java: [ '11', '17', '21', '25' ]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -23,7 +23,7 @@ jobs:
       - name: Setup java
         uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: 'corretto'
           java-version: ${{ matrix.java }}
           cache: 'sbt'
 
